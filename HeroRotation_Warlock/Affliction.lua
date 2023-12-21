@@ -27,6 +27,7 @@ local bool          = HR.Commons.Everyone.bool
 --- ======= APL LOCALS =======
 -- Commons
 local Everyone = HR.Commons.Everyone
+local Warlock  = HR.Commons.Warlock
 
 -- GUI Settings
 local Settings = {
@@ -53,6 +54,7 @@ local Trinket2 = Equip[14] and Item(Equip[14]) or Item(0)
 local Enemies40y, Enemies10ySplash, EnemiesCount10ySplash
 local VarPSUp, VarVTUp, VarVTPSUp, VarSRUp, VarCDDoTsUp, VarHasCDs, VarCDsActive
 local VarMinAgony
+local SoulRotBuffLength = (Player:HasTier(31, 2)) and 12 or 8
 local SoulShards = 0
 local BossFightRemains = 11111
 local FightRemains = 11111
@@ -71,6 +73,7 @@ HL:RegisterForEvent(function()
   Equip = Player:GetEquipment()
   Trinket1 = Equip[13] and Item(Equip[13]) or Item(0)
   Trinket2 = Equip[14] and Item(Equip[14]) or Item(0)
+  SoulRotBuffLength = (Player:HasTier(31, 2)) and 12 or 8
 end, "PLAYER_EQUIPMENT_CHANGED")
 
 HL:RegisterForEvent(function()
@@ -91,6 +94,7 @@ local function CalcMinAgony(Enemies)
 end
 
 local function CanSeed(Enemies)
+  if not Enemies or #Enemies == 0 then return false end
   if S.SeedofCorruption:InFlight() or Player:PrevGCDP(1, S.SeedofCorruption) then return false end
   local TotalTargets = 0
   local SeededTargets = 0
@@ -117,6 +121,11 @@ end
 local function EvaluateTargetIfFilterSiphonLife(TargetUnit)
   -- target_if=min:remains
   return (TargetUnit:DebuffRemains(S.SiphonLifeDebuff))
+end
+
+local function EvaluateTargetIfFilterSoulRot(TargetUnit)
+  -- target_if=min:dot.soul_rot.remains
+  return (TargetUnit:DebuffRemains(S.SoulRotDebuff))
 end
 
 local function EvaluateTargetIfAgony(TargetUnit)
@@ -198,7 +207,7 @@ local function Precombat()
     if Cast(S.GrimoireofSacrifice, Settings.Affliction.GCDasOffGCD.GrimoireOfSacrifice) then return "grimoire_of_sacrifice precombat 2"; end
   end
   -- snapshot_stats
-  -- seed_of_corruption,if=spell_targets.seed_of_corruption_aoe>3
+  -- seed_of_corruption,if=spell_targets.seed_of_corruption_aoe>2
   -- NYI precombat multi target
   -- haunt
   if S.Haunt:IsReady() then
@@ -331,6 +340,10 @@ local function AoE()
   if S.SeedofCorruption:IsReady() and (Target:DebuffRemains(S.CorruptionDebuff) < 5 and not (S.SeedofCorruption:InFlight() or Target:DebuffUp(S.SeedofCorruptionDebuff))) then
     if Cast(S.SeedofCorruption, nil, nil, not Target:IsSpellInRange(S.SeedofCorruption)) then return "seed_of_corruption aoe 14"; end
   end
+  -- corruption,target_if=min:remains,if=remains<5&!talent.seed_of_corruption
+  if S.Corruption:IsReady() and (not S.SeedofCorruption:IsAvailable()) then
+    if Everyone.CastTargetIf(S.Corruption, Enemies40y, "min", EvaluateTargetIfFilterCorruption, EvaluateTargetIfCorruption, not Target:IsSpellInRange(S.Corruption)) then return "corruption aoe 15"; end
+  end
   -- agony,target_if=min:remains,if=active_dot.agony<8&remains<cooldown.vile_taint.remains+action.vile_taint.cast_time&remains<5
   if S.Agony:IsReady() and (S.AgonyDebuff:AuraActiveCount() < 8) then
     if Everyone.CastTargetIf(S.Agony, Enemies40y, "min", EvaluateTargetIfFilterAgony, EvaluateTargetIfAgony, not Target:IsSpellInRange(S.Agony)) then return "agony aoe 16"; end
@@ -339,6 +352,10 @@ local function AoE()
   -- Note: Not handling Power Infusion
   if CDsON() and S.SummonDarkglare:IsCastable() and (VarPSUp and VarVTUp and VarSRUp) then
     if Cast(S.SummonDarkglare, Settings.Affliction.GCDasOffGCD.SummonDarkglare) then return "summon_darkglare aoe 18"; end
+  end
+  -- drain_life,target_if=min:dot.soul_rot.remains,if=buff.inevitable_demise.stack>10&buff.soul_rot.up&buff.soul_rot.remains<=gcd.max&!talent.siphon_life
+  if S.DrainLife:IsReady() and (Player:BuffStack(S.InevitableDemiseBuff) > 10 and Player:BuffUp(S.SoulRot) and Player:BuffRemains(S.SoulRot) <= Player:GCD() + 0.25 and not S.SiphonLife:IsAvailable()) then
+    if Everyone.CastTargetIf(S.DrainLife, Enemies40y, "min", EvaluateTargetIfFilterSoulRot, nil, not Target:IsSpellInRange(S.DrainLife)) then return "drain_life aoe 19"; end
   end
   -- malefic_rapture,if=buff.umbrafire_kindling.up&(pet.darkglare.active|!talent.doom_blossom)
   if S.MaleficRapture:IsReady() and (Player:BuffUp(S.UmbrafireKindlingBuff) and (HL.GuardiansTable.DarkglareDuration > 0 or not S.DoomBlossom:IsAvailable())) then
@@ -352,9 +369,9 @@ local function AoE()
   if S.MaleficRapture:IsReady() and (((S.SummonDarkglare:CooldownRemains() > 15 or SoulShards > 3) and not S.SowTheSeeds:IsAvailable()) or Player:BuffUp(S.TormentedCrescendoBuff)) then
     if Cast(S.MaleficRapture, nil, nil, not Target:IsInRange(100)) then return "malefic_rapture aoe 24"; end
   end
-  -- drain_life,if=(buff.soul_rot.up|!talent.soul_rot)&buff.inevitable_demise.stack>10
-  if S.DrainLife:IsReady() and (Target:DebuffUp(S.SoulRotDebuff) or not S.SoulRot:IsAvailable()) and Player:BuffStack(S.InevitableDemiseBuff) > 10 then
-    if Cast(S.DrainLife, nil, nil, not Target:IsSpellInRange(S.DrainLife)) then return "drain_life aoe 26"; end
+  -- drain_life,target_if=min:dot.soul_rot.remains,if=(buff.soul_rot.up|!talent.soul_rot)&buff.inevitable_demise.stack>10
+  if S.DrainLife:IsReady() and (Player:BuffUp(S.SoulRot) or not S.SoulRot:IsAvailable()) and Player:BuffStack(S.InevitableDemiseBuff) > 10 then
+    if Everyone.CastTargetIf(S.DrainLife, Enemies40y, "min", EvaluateTargetIfFilterSoulRot, nil, not Target:IsSpellInRange(S.DrainLife)) then return "drain_life aoe 26"; end
   end
   -- drain_soul,cycle_targets=1,if=buff.nightfall.react&talent.shadow_embrace&(debuff.shadow_embrace.stack<3|debuff.shadow_embrace.remains<3)
   if S.DrainSoul:IsReady() and (Player:BuffUp(S.NightfallBuff) and S.ShadowEmbrace:IsAvailable()) then
@@ -421,7 +438,7 @@ local function Cleave()
     if Cast(S.UnstableAffliction, nil, nil, not Target:IsSpellInRange(S.UnstableAffliction)) then return "unstable_affliction cleave 14"; end
   end
   -- seed_of_corruption,if=!talent.absolute_corruption&dot.corruption.remains<5&talent.sow_the_seeds&can_seed
-  if S.SeedofCorruption:IsReady() and (not S.AbsoluteCorruption:IsAvailable() and Target:DebuffRemains(S.CorruptionDebuff) < 5 and S.SowTheSeeds:IsAvailable() and CanSeed()) then
+  if S.SeedofCorruption:IsReady() and (not S.AbsoluteCorruption:IsAvailable() and Target:DebuffRemains(S.CorruptionDebuff) < 5 and S.SowTheSeeds:IsAvailable() and CanSeed(Enemies40y)) then
     if Cast(S.SeedofCorruption, nil, nil, not Target:IsSpellInRange(S.SeedofCorruption)) then return "seed_of_corruption cleave 16"; end
   end
   -- corruption,target_if=min:remains,if=remains<5
@@ -480,8 +497,8 @@ local function Cleave()
   if S.DrainLife:IsReady() and (Player:BuffStack(S.InevitableDemiseBuff) > 48 or Player:BuffStack(S.InevitableDemiseBuff) > 20 and FightRemains < 4) then
     if Cast(S.DrainLife, nil, nil, not Target:IsSpellInRange(S.DrainLife)) then return "drain_life cleave 44"; end
   end
-  -- drain_life,if=buff.soul_rot.up&buff.inevitable_demise.stack>10
-  if S.DrainLife:IsReady() and Target:DebuffUp(S.SoulRotDebuff) and Player:BuffStack(S.InevitableDemiseBuff) > 10 then
+  -- drain_life,if=buff.soul_rot.up&buff.inevitable_demise.stack>30
+  if S.DrainLife:IsReady() and (Player:BuffUp(S.SoulRot) and Player:BuffStack(S.InevitableDemiseBuff) > 30) then
     if Cast(S.DrainLife, nil, nil, not Target:IsSpellInRange(S.DrainLife)) then return "drain_life cleave 46"; end
   end
   -- agony,target_if=refreshable
