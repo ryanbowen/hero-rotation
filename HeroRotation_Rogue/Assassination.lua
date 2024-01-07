@@ -185,6 +185,7 @@ local function UsePriorityRotation()
     if Player:InstanceDifficulty() == 16 and Target:NPCID() == 138967 then
       return true
     end
+    -- 
   end
 
   return false
@@ -625,7 +626,7 @@ local function Stealthed ()
       if Cast(S.Garrote, nil, nil, not TargetInMeleeRange) then return "Cast Garrote (Improved Garrote)" end
     end
     if ComboPointsDeficit >= (1 + 2 * num(S.ShroudedSuffocation:IsAvailable())) then 
-      if (Target:PMultiplier(S.Garrote) <= 1 or Target:DebuffRemains(S.Garrote) < 14 or not SingleTarget and MasterAssassinRemains() < 3) then
+      if (Target:PMultiplier(S.Garrote) <= 1 or Target:DebuffRemains(S.Garrote) < 14 or (not SingleTarget and MasterAssassinRemains() < 3)) then
         if Cast(S.Garrote, nil, nil, not TargetInMeleeRange) then return "Cast Garrote (Improved Garrote Low CP 2)" end
       end
     end
