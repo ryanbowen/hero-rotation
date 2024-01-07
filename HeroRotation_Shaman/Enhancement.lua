@@ -50,7 +50,7 @@ local MaxMaelstromStacks = 10
 local MaxAshenCatalystStacks = 8
 local MaxConvergingStormsStacks = 6
 local VarMinTalentedCDRemains = 1000
-local EnemiesMelee, EnemiesMeleeCount
+local EnemiesMelee, EnemiesMeleeCount, Enemies40yCount
 local MaxEBCharges = S.LavaBurst:IsAvailable() and 2 or 1
 local TIAction = S.LightningBolt
 local BossFightRemains = 11111
@@ -74,6 +74,17 @@ local Settings = {
   Commons = HR.GUISettings.APL.Shaman.Commons,
   Enhancement = HR.GUISettings.APL.Shaman.Enhancement
 }
+
+local function RangedTargetCount(range)
+  local EnemiesTable = Player:GetEnemiesInRange(range)
+  local TarCount = 1
+  for _, Enemy in pairs(EnemiesTable) do
+    if Enemy:GUID() ~= Target:GUID() and (Enemy:AffectingCombat() or Enemy:IsDummy()) then
+      TarCount = TarCount + 1
+    end
+  end
+  return TarCount
+end
 
 local function TotemFinder()
   for i = 1, 6, 1 do
@@ -132,6 +143,19 @@ local function Precombat()
   -- variable,name=min_talented_cd_remains,value=((cooldown.feral_spirit.remains%(1+1.5*talent.witch_doctors_ancestry.rank))+1000*!talent.feral_spirit.enabled)<?(cooldown.doom_winds.remains+1000*!talent.doom_winds.enabled)<?(cooldown.ascendance.remains+1000*!talent.ascendance.enabled)
   -- Note: Moved to APL(), as we probably should be checking this during the fight.
   -- snapshot_stats
+  -- Manually added openers:
+  -- primordial_wave
+  if S.PrimordialWave:IsReady() then
+    if Cast(S.PrimordialWave, nil, Settings.Commons.DisplayStyle.Signature, not Target:IsSpellInRange(S.PrimordialWave)) then return "primordial_wave precombat 6"; end
+  end
+  -- feral_spirit
+  if S.FeralSpirit:IsCastable() then
+    if Cast(S.FeralSpirit, Settings.Enhancement.GCDasOffGCD.FeralSpirit) then return "feral_spirit precombat 8"; end
+  end
+  -- flame_shock
+  if S.FlameShock:IsReady() then
+    if Cast(S.FlameShock, nil, nil, not Target:IsSpellInRange(S.FlameShock)) then return "flame_shock precombat 10"; end
+  end
 end
 
 local function Single()
@@ -542,11 +566,13 @@ end
 --- ======= MAIN =======
 local function APL()
   -- Unit Update
-  EnemiesMelee = Player:GetEnemiesInMeleeRange(5)
+  EnemiesMelee = Player:GetEnemiesInMeleeRange(10)
   if AoEON() then
     EnemiesMeleeCount = #EnemiesMelee
+    Enemies40yCount = RangedTargetCount(40)
   else
     EnemiesMeleeCount = 1
+    Enemies40yCount = 1
   end
 
   -- Calculate fight_remains
@@ -603,7 +629,7 @@ local function APL()
       end
     end
     -- wind_shear
-    local ShouldReturn = Everyone.Interrupt(30, S.WindShear, Settings.Commons.OffGCDasOffGCD.WindShear, false); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.WindShear, Settings.Commons.OffGCDasOffGCD.WindShear, false); if ShouldReturn then return ShouldReturn; end
     -- auto_attack
     if Settings.Commons.Enabled.Trinkets then
       -- use_item,name=elementium_pocket_anvil,use_off_gcd=1
@@ -682,12 +708,12 @@ local function APL()
       if Cast(S.DoomWinds, Settings.Enhancement.GCDasOffGCD.DoomWinds, nil, not Target:IsSpellInRange(S.DoomWinds)) then return "doom_winds main 30"; end
     end
     -- call_action_list,name=single,if=active_enemies=1
-    if EnemiesMeleeCount == 1 then
+    if EnemiesMeleeCount == 1 or Enemies40yCount == 1 then
       local ShouldReturn = Single(); if ShouldReturn then return ShouldReturn; end
     end
     -- call_action_list,name=aoe,if=active_enemies>1&(rotation.standard|rotation.simple)
     -- call_action_list,name=funnel,if=active_enemies>1&rotation.funnel
-    if AoEON() and EnemiesMeleeCount > 1 then
+    if AoEON() and (EnemiesMeleeCount > 1 or Enemies40yCount > 1) then
       if Settings.Enhancement.Rotation == "Standard" then
         local ShouldReturn = Aoe(); if ShouldReturn then return ShouldReturn; end
       else

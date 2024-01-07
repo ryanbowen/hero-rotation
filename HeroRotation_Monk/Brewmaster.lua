@@ -218,7 +218,7 @@ local function RotationPTA()
   end
   -- breath_of_fire,if=buff.charred_passions.remains<cooldown.blackout_kick.remains&(buff.blackout_combo.up|!talent.blackout_combo.enabled)
   if S.BreathofFire:IsCastable() and (Player:BuffRemains(S.CharredPassionsBuff) < S.BlackoutKick:CooldownRemains() and (Player:BuffUp(S.BlackoutComboBuff) or not S.BlackoutCombo:IsAvailable())) then
-    if Cast(S.BreathofFire, Settings.Commons.GCDasOffGCD.BreathOfFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_pta 16"; end
+    if Cast(S.BreathofFire, Settings.Brewmaster.GCDasOffGCD.BreathOfFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_pta 16"; end
   end
   -- summon_white_tiger_statue
   if CDsON() and S.SummonWhiteTigerStatue:IsCastable() then
@@ -232,11 +232,11 @@ local function RotationPTA()
   -- exploding_keg,if=(!talent.bonedust_brew.enabled)
   -- Note: Combining both lines.
   if S.ExplodingKeg:IsCastable() and (Player:BuffUp(S.BonedustBrewBuff) or S.BonedustBrew:CooldownRemains() >= 20 or not S.BonedustBrew:IsAvailable()) then
-    if Cast(S.ExplodingKeg, Settings.Commons.GCDasOffGCD.ExplodingKeg, nil, not Target:IsInRange(40)) then return "exploding_keg rotation_pta 22"; end
+    if Cast(S.ExplodingKeg, Settings.Brewmaster.GCDasOffGCD.ExplodingKeg, nil, not Target:IsInRange(40)) then return "exploding_keg rotation_pta 22"; end
   end
   -- breath_of_fire,if=(buff.blackout_combo.up|!talent.blackout_combo.enabled)
   if S.BreathofFire:IsCastable() and (Player:BuffUp(S.BlackoutComboBuff) or not S.BlackoutCombo:IsAvailable()) then
-    if Cast(S.BreathofFire, Settings.Commons.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_pta 24"; end
+    if Cast(S.BreathofFire, Settings.Brewmaster.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_pta 24"; end
   end
   -- keg_smash,if=buff.press_the_advantage.stack<10
   if S.KegSmash:IsReady() and (Player:BuffStack(S.PresstheAdvantageBuff) < 10) then
@@ -281,7 +281,7 @@ local function RotationBOC()
   end
   -- weapons_of_order,if=(buff.recent_purifies.up)&talent.improved_invoke_niuzao_the_black_ox.enabled
   if CDsON() and S.WeaponsofOrder:IsCastable() and (RecentPurifiesBuff and S.ImprovedInvokeNiuzao:IsAvailable()) then
-    if Cast(S.WeaponsofOrder, Settings.Brewmaster.GCDasOffGCD.WeaponsOfOrder) then return "weapons_of_order rotation_boc 6"; end
+    if Cast(S.WeaponsofOrder, Settings.Commons.DisplayStyle.Signature) then return "weapons_of_order rotation_boc 6"; end
   end
   -- invoke_niuzao_the_black_ox,if=(buff.invoke_niuzao_the_black_ox.down&buff.recent_purifies.up&buff.weapons_of_order.remains<14)&talent.improved_invoke_niuzao_the_black_ox.enabled
   if CDsON() and S.InvokeNiuzaoTheBlackOx:IsCastable() and ((Player:BuffDown(S.InvokeNiuzaoTheBlackOx) and RecentPurifiesBuff and Player:BuffRemains(S.WeaponsofOrderBuff) < 14) and S.ImprovedInvokeNiuzao:IsAvailable()) then
@@ -297,7 +297,7 @@ local function RotationBOC()
   end
   -- weapons_of_order,if=(talent.weapons_of_order.enabled)&!talent.improved_invoke_niuzao_the_black_ox.enabled
   if CDsON() and S.WeaponsofOrder:IsCastable() and (not S.ImprovedInvokeNiuzao:IsAvailable()) then
-    if Cast(S.WeaponsofOrder, Settings.Brewmaster.GCDasOffGCD.WeaponsOfOrder) then return "weapons_of_order rotation_boc 14"; end
+    if Cast(S.WeaponsofOrder, Settings.Commons.DisplayStyle.Signature) then return "weapons_of_order rotation_boc 14"; end
   end
   -- keg_smash,if=(time-action.weapons_of_order.last_used<2)
   if S.KegSmash:IsReady() and (S.WeaponsofOrder:TimeSinceLastCast() < 2) then
@@ -329,7 +329,7 @@ local function RotationBOC()
   end
   -- breath_of_fire,if=(buff.charred_passions.remains<cooldown.blackout_kick.remains)
   if S.BreathofFire:IsCastable() and (Player:BuffRemains(S.CharredPassionsBuff) < S.BlackoutKick:CooldownRemains()) then
-    if Cast(S.BreathofFire, Settings.Commons.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_boc 30"; end
+    if Cast(S.BreathofFire, Settings.Brewmaster.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_boc 30"; end
   end
   -- keg_smash,if=(buff.weapons_of_order.up&debuff.weapons_of_order_debuff.stack<=3)
   if S.KegSmash:IsReady() and (Player:BuffUp(S.WeaponsofOrderBuff) and Player:BuffStack(S.WeaponsofOrderBuff) <= 3) then
@@ -352,7 +352,7 @@ local function RotationBOC()
   -- exploding_keg,if=(!talent.bonedust_brew.enabled)
   -- Note: Combining all three lines.
   if S.ExplodingKeg:IsCastable() and (Player:BuffUp(S.BonedustBrewBuff) or S.BonedustBrew:CooldownRemains() >= 20 or not S.BonedustBrew:IsAvailable()) then
-    if Cast(S.ExplodingKeg, Settings.Commons.GCDasOffGCD.ExplodingKeg, nil, not Target:IsInRange(40)) then return "exploding_keg rotation_boc 38"; end
+    if Cast(S.ExplodingKeg, Settings.Brewmaster.GCDasOffGCD.ExplodingKeg, nil, not Target:IsInRange(40)) then return "exploding_keg rotation_boc 38"; end
   end
   -- keg_smash
   if S.KegSmash:IsReady() then
@@ -364,7 +364,7 @@ local function RotationBOC()
   end
   -- breath_of_fire
   if S.BreathofFire:IsCastable() then
-    if Cast(S.BreathofFire, Settings.Commons.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_boc 44"; end
+    if Cast(S.BreathofFire, Settings.Brewmaster.GCDasOffGCD.BreathofFire, nil, not Target:IsInMeleeRange(12)) then return "breath_of_fire rotation_boc 44"; end
   end
   -- tiger_palm,if=active_enemies=1&!talent.blackout_combo.enabled
   if S.TigerPalm:IsReady() and (EnemiesCount5 == 1 and not S.BlackoutCombo:IsAvailable()) then
@@ -424,7 +424,7 @@ local function APL()
     -- chi_torpedo,if=movement.distance>5
     -- Note: Not suggesting movement abilities
     -- spear_hand_strike,if=target.debuff.casting.react
-    local ShouldReturn = Everyone.Interrupt(5, S.SpearHandStrike, Settings.Commons.OffGCDasOffGCD.Interrupts, Stuns); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.SpearHandStrike, Settings.Commons.OffGCDasOffGCD.Interrupts, Stuns); if ShouldReturn then return ShouldReturn; end
     -- Manually added: Defensives
     if IsTanking then
       local ShouldReturn = Defensives(); if ShouldReturn then return ShouldReturn; end
