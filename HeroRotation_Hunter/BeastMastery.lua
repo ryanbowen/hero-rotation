@@ -226,8 +226,8 @@ local function ST()
   if S.BarbedShot:IsCastable() and EvaluateTargetIfBarbedShotST(Target) then
     if Cast(S.BarbedShot, nil, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot st mt_backup 3"; end
   end
-  -- kill_command,if=full_recharge_time<gcd&talent.alpha_predator
-  if S.KillCommand:IsReady() and (S.KillCommand:FullRechargeTime() < GCDMax and S.AlphaPredator:IsAvailable()) then
+  -- kill_command,if=!talent.wild_instincts&full_recharge_time<gcd&talent.alpha_predator
+  if S.KillCommand:IsReady() and (not S.WildInstincts:IsAvailable() and S.KillCommand:FullRechargeTime() < GCDMax and S.AlphaPredator:IsAvailable()) then
     if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 4"; end
   end
   -- call_of_the_wild,if=!talent.wild_instincts&variable.cotw_ready
@@ -240,7 +240,7 @@ local function ST()
   end
   -- bloodshed
   if S.Bloodshed:IsCastable() then
-    if Cast(S.Bloodshed, Settings.Commons.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed st 10"; end
+    if Cast(S.Bloodshed, Settings.BeastMastery.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed st 10"; end
   end
   -- bestial_wrath
   if S.BestialWrath:IsCastable() and CDsON() then
@@ -545,7 +545,7 @@ end
 
 local function OnInit ()
   HR.Print("Beast Mastery can use pet abilities to better determine AoE. Make sure you have Growl and Blood Bolt / Bite / Claw / Smack on your player action bars.")
-  HR.Print("Beast Mastery Hunter rotation has been updated for patch 10.2.0.")
+  HR.Print("Beast Mastery Hunter rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(253, APL, OnInit)

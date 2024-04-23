@@ -42,8 +42,6 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Balance = {
-    BarkskinHP = 50,
-    RenewalHP = 40,
     ShowCancelStarlord = false,
     ShowMoonkinFormOOC = false,
     PotionType = {
@@ -66,16 +64,17 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Feral = {
+    Align2Min = false,
     ShowCatFormOOC = false,
     ShowHealSpells = false,
     UseEasySwipe = false,
     UseZerkBiteweave = false,
-    Align2Min = false,
     PotionType = {
       Selected = "Power",
     },
     GCDasOffGCD = {
       BsInc = true,
+      FeralFrenzy = false,
       HeartOfTheWild = true,
       Regrowth = true,
       Renewal = true,
@@ -87,15 +86,15 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Guardian = {
-    UseIronfurOffensively = true,
-    UseRageDefensively = true,
+    BarkskinHP = 50,
+    BristlingFurRage = 50,
     DoCRegrowthNoPoPHP = 30,
     DoCRegrowthWithPoPHP = 45,
-    RenewalHP = 60,
-    BarkskinHP = 50,
     FrenziedRegenHP = 70,
+    RenewalHP = 60,
     SurvivalInstinctsHP = 30,
-    BristlingFurRage = 50,
+    UseIronfurOffensively = true,
+    UseRageDefensively = true,
     PotionType = {
       Selected = "Power",
     },

@@ -115,9 +115,24 @@ end
 
 function Commons.GroupBuffMissing(spell)
   local range = 40
-  local BotBBuffIDs = { 381732, 381741, 381746, 381748, 381749, 381750, 381751, 381752, 381753, 381754, 381756, 381757, 381758 }
-  if spell:Name() == "Battle Shout" then range = 100 end
-  if Player:BuffDown(spell) then return true end
+  local BotBBuffIDs = {
+    [1] = 381758, -- Warrior
+    [2] = 381752, -- Paladin
+    [3] = 381749, -- Hunter (432655 Buff ID exists, but doesn't seem to be used)
+    [4] = 381754, -- Rogue
+    [5] = 381753, -- Priest
+    [6] = 381732, -- Death Knight
+    [7] = 381756, -- Shaman (432652? Unverified, but unlikely to be used, like the other extra Buff IDs)
+    [8] = 381750, -- Mage
+    [9] = 381757, -- Warlock
+    [10] = 381751, -- Monk
+    [11] = 381746, -- Druid (432658 Buff ID exists, but doesn't seem to be used)
+    [12] = 381741, -- Demon Hunter
+    [13] = 381748, -- Evoker (432658 Buff ID exists, but doesn't seem to be used)
+  }
+  if spell:ID() == 6673 then range = 100 end
+  if Player:BuffDown(spell, true) then return true end
+  -- Are we in a party or raid?
   local Group
   if UnitInRaid("player") then
     Group = Unit.Raid
@@ -126,18 +141,23 @@ function Commons.GroupBuffMissing(spell)
   else
     return false
   end
+  -- Check for the buff amongst group members.
+  local TotalChars = 0
+  local BuffedChars = 0
   for _, Char in pairs(Group) do
     if Char:Exists() and not Char:IsDeadOrGhost() and Char:IsInRange(range) then
-      if spell:Name() == "Blessing of the Bronze" then
-        for _, v in pairs(BotBBuffIDs) do
-          if Char:BuffUp(Spell(v), true) then return false end
+      TotalChars = TotalChars + 1
+      if spell:ID() == 381748 then -- Blessing of the Bronze
+        local _, _, CharClass = Char:Class()
+        if Char:BuffUp(Spell(BotBBuffIDs[CharClass]), true) then
+          BuffedChars = BuffedChars + 1
         end
-        return true
       elseif Char:BuffDown(spell, true) then
         return true
       end
     end
   end
+  if spell:ID() == 381748 and BuffedChars < TotalChars then return true end
   return false
 end
 

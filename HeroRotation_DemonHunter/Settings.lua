@@ -39,12 +39,33 @@ HR.GUISettings.APL.DemonHunter = {
       Racials = true,
     },
   },
+  Havoc = {
+    BlurHealthThreshold = 65,
+    ConserveFelRush = false,
+    PotionType = {
+      Selected = "Power",
+    },
+    -- {Display OffGCD as OffGCD, ForceReturn}
+    OffGCDasOffGCD = {
+      -- Abilities
+      Blur = true,
+      VengefulRetreat = true,
+    },
+    GCDasOffGCD = {
+      -- Abilities
+      EssenceBreak = false,
+      FelBarrage = false,
+      EyeBeam = false,
+      GlaiveTempest = false,
+      ImmolationAura = false,
+      ThrowGlaive = false,
+    },
+  },
   Vengeance = {
-    MetamorphosisHealthThreshold = 50,
-    FieryBrandHealthThreshold = 40,
-    DemonSpikesHealthThreshold = 65,
-    FelDevHealthThreshold = 30,
     ConserveInfernalStrike = true,
+    DemonSpikesHealthThreshold = 65,
+    FieryBrandHealthThreshold = 40,
+    MetamorphosisHealthThreshold = 50,
     PotionType = {
       Selected = "Power",
     },
@@ -61,26 +82,6 @@ HR.GUISettings.APL.DemonHunter = {
       FelDevastation = false,
       FieryBrand = false,
     }
-  },
-  Havoc = {
-    BlurHealthThreshold = 65,
-    ConserveFelRush = false,
-    PotionType = {
-      Selected = "Power",
-    },
-    -- {Display OffGCD as OffGCD, ForceReturn}
-    OffGCDasOffGCD = {
-      -- Abilities
-      Blur = true,
-      VengefulRetreat = true,
-    },
-    GCDasOffGCD = {
-      -- Abilities
-      EyeBeam = false,
-      GlaiveTempest = false,
-      ImmolationAura = false,
-      ThrowGlaive = false,
-    },
   }
 }
 
@@ -94,11 +95,10 @@ local CP_Vengeance = CreateChildPanel(CP_DemonHunter, "Vengeance")
 CreateARPanelOptions(CP_DemonHunter, "APL.DemonHunter.Commons")
 
 -- Vengeance
-CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.MetamorphosisHealthThreshold", {0, 100, 5}, "Metamorphosis Health Threshold", "Suggest Metamorphosis when below this health percentage.")
-CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.FieryBrandHealthThreshold", {0, 100, 5}, "Fiery Brand Health Threshold", "Suggest Fiery Brand when below this health percentage.")
-CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.DemonSpikesHealthThreshold", {0, 100, 5}, "Demon Spikes Health Threshold", "Suggest Demon Spikes when below this health percentage.")
-CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.FelDevHealthThreshold", {0, 100, 5}, "Fel Devastation Health Threshold", "Suggest Fel Devastation during Blind Faith when below this health percentage.")
 CreatePanelOption("CheckButton", CP_Vengeance, "APL.DemonHunter.Vengeance.ConserveInfernalStrike", "Conserve Infernal Strike", "Save at least 1 Infernal Strike charge for mobility.")
+CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.DemonSpikesHealthThreshold", {0, 100, 5}, "Demon Spikes Health Threshold", "Suggest Demon Spikes when below this health percentage.")
+CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.FieryBrandHealthThreshold", {0, 100, 5}, "Fiery Brand Health Threshold", "Suggest Fiery Brand when below this health percentage.")
+CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.MetamorphosisHealthThreshold", {0, 100, 5}, "Metamorphosis Health Threshold", "Suggest Metamorphosis when below this health percentage.")
 CreateARPanelOptions(CP_Vengeance, "APL.DemonHunter.Vengeance")
 
 -- Havoc

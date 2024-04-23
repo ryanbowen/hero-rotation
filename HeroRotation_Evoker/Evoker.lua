@@ -33,6 +33,7 @@ Spell.Evoker.Commons = {
   Disintegrate                          = Spell(356995),
   EmeraldBlossom                        = Spell(355913),
   FireBreath                            = MultiSpell(357208,382266), -- with and without Font of Magic
+  Hover                                 = Spell(358267),
   LivingFlame                           = Spell(361469),
   -- Talents
   AncientFlame                          = Spell(369990),
@@ -148,7 +149,9 @@ Item.Evoker.Commons = {
   MirrorofFracturedTomorrows            = Item(207581, {13, 14}),
   NeltharionsCalltoChaos                = Item(204201, {13, 14}),
   NymuesUnravelingSpindle               = Item(208615, {13, 14}),
+  RubyWhelpShell                        = Item(193757, {13, 14}),
   SpoilsofNeltharus                     = Item(193773, {13, 14}),
+  WhisperingIncarnateIcon               = Item(194301, {13, 14}),
   -- Items
   Dreambinder                           = Item(208616, {16}),
   Iridal                                = Item(208321, {16}),

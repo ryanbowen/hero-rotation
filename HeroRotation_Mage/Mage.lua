@@ -92,6 +92,7 @@ Spell.Mage.Arcane = MergeTableByKey(Spell.Mage.Commons, {
   ArcaneOrb                             = Spell(153626), --Splash, 16
   ArcanePower                           = Spell(321739),
   ArcaneSurge                           = Spell(365350),
+  ArcingCleave                          = Spell(231564),
   CascadingPower                        = Spell(384276),
   ChargedOrb                            = Spell(384651),
   ConjureManaGem                        = Spell(759),
@@ -143,6 +144,7 @@ Spell.Mage.Fire = MergeTableByKey(Spell.Mage.Commons, {
   BlazingBarrier                        = Spell(235313),
   Combustion                            = Spell(190319),
   FeeltheBurn                           = Spell(383391),
+  FlameAccelerant                       = Spell(203275),
   FireBlast                             = Spell(108853),
   Firestarter                           = Spell(205026),
   FlameOn                               = Spell(205029),
@@ -253,6 +255,7 @@ Item.Mage.Commons = {
   VoidmendersShadowgem                  = Item(110007, {13, 14}),
   -- Gladiator's Badges
   CrimsonGladiatorsBadge                = Item(201807, {13, 14}),
+  DraconicGladiatorsBadge               = Item(216279, {13, 14}),
   ObsidianGladiatorsBadge               = Item(205708, {13, 14}),
   VerdantGladiatorsBadge                = Item(209343, {13, 14}),
   -- Other On-Use Items

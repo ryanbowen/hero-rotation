@@ -37,14 +37,11 @@ HR.GUISettings.APL.Paladin = {
   },
   Protection = {
     -- CDs HP %
-    BubbleHP = 15,
-    LoHHP = 15,
-    GoAKHP = 40,
-    SotRHP = 70,
-    PrioSelfWordofGloryHP = 40,
-    OpportunisticSelfWordofGloryHP = 75,
-    FriendlyWordofGloryHP = 60,
     ArdentDefenderHP = 60,
+    GoAKHP = 40,
+    LoHHP = 15,
+    PrioSelfWordofGloryHP = 40,
+    SotRHP = 70,
     PotionType = {
       Selected = "Power",
     },
@@ -66,7 +63,7 @@ HR.GUISettings.APL.Paladin = {
     }
   },
   Retribution = {
-    DisableFinisherCDCheck = false,
+    DisableCrusadeAWCDCheck = false,
     PotionType = {
       Selected = "Power",
     },
@@ -75,6 +72,7 @@ HR.GUISettings.APL.Paladin = {
       FinalReckoning = false,
       Seraphim = false,
       ShieldOfVengeance = true,
+      WakeOfAshes = false,
     },
     OffGCDasOffGCD = {
       AvengingWrath = true,
@@ -112,19 +110,16 @@ local CP_Holy = CreateChildPanel(CP_Paladin, "Holy")
 CreateARPanelOptions(CP_Paladin, "APL.Paladin.Commons")
 
 -- Protection
-CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.BubbleHP", {0, 100, 1}, "Bubble HP", "Set the Bubble HP threshold.")
 CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.LoHHP", {0, 100, 1}, "Lay on Hands HP", "Set the Lay on Hands HP threshold.")
 CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.GoAKHP", {0, 100, 1}, "GoAK HP", "Set the Guardian of Ancient Kings HP threshold.")
 CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.SotRHP", {0, 100, 1}, "SotR HP", "Set the Shield of the Righteous HP threshold.")
 CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.ArdentDefenderHP", {0, 100, 1}, "Ardent Defender HP", "Set the Ardent Defender HP threshold.")
 CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.PrioSelfWordofGloryHP", {0, 100, 1}, "Prio Self Word of Glory HP", "Set the Word of Glory HP threshold for casting on ourself: if we drop below this HP, we'll prio WOG over economy globals.")
-CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.OpportunisticSelfWordofGloryHP", {0, 100, 1}, "Opportunistic Self Word of Glory HP", "Set the Word of Glory HP threshold for casting on ourself behind economy globals.")
-CreatePanelOption("Slider", CP_Protection, "APL.Paladin.Protection.FriendlyWordofGloryHP", {0, 100, 1}, "Friendly Word of Glory HP", "Set the friendly Word of Glory HP threshold for casting on a friendly.")
 CreateARPanelOptions(CP_Protection2, "APL.Paladin.Protection")
 
 -- Retribution
-CreatePanelOption("CheckButton", CP_Retribution, "APL.Paladin.Retribution.DisableFinisherCDCheck", "Disable CDs for Finishers", "Enable this option to ignore the status of cooldowns, such as Crusade, Execution Sentence, and Final Reckoning, when deciding whether to suggest finishers.")
 CreateARPanelOptions(CP_Retribution, "APL.Paladin.Retribution")
+CreatePanelOption("CheckButton", CP_Retribution, "APL.Paladin.Retribution.DisableCrusadeAWCDCheck", "Disable Crusade/AW CD Checks for Finishers and Cooldowns", "Enable this option to ignore the status of Crusade and Avenging Wrath when deciding whether to suggest finishers or other 'cooldown' abilities. NOTE: This causes the addon to stray from the APL, which will result in a DPS LOSS, but allows for smoother gameplay suggestions when you need to hold Crusade for any reason.")
 
 -- Holy
 CreateARPanelOptions(CP_Holy, "APL.Paladin.Holy")

@@ -47,7 +47,7 @@ ArcaneOldPlayerAffectingCombat = HL.AddCoreOverride("Player.AffectingCombat",
 
 HL.AddCoreOverride("Spell.IsCastable",
   function (self, BypassRecovery, Range, AoESpell, ThisUnit, Offset)
-    if self:CastTime() > 0 and Player:IsMoving() and Settings.Arcane.MovingRotation then
+    if self:CastTime() > 0 and Player:IsMoving() and Settings.Commons.MovingRotation then
       return false
     end
 
@@ -102,11 +102,36 @@ FirePlayerBuffRemains = HL.AddCoreOverride("Player.BuffRemains",
   end
 , 63)
 
+local FirePlayerBuffUp
+FirePlayerBuffUp = HL.AddCoreOverride("Player.BuffUp",
+  function (self, Spell, AnyCaster, Offset)
+    local BaseCheck = FirePlayerBuffUp(self, Spell, AnyCaster, Offset)
+    if Spell == SpellFire.HeatingUpBuff then
+      -- "Predictive" Heating Up buff for SKB Pyroblast casts...
+      return BaseCheck or Player:IsCasting(SpellFire.Pyroblast) and Player:BuffRemains(SpellFire.FuryoftheSunKingBuff) > 0
+    else
+      return BaseCheck
+    end
+  end
+, 63)
+
+local FirePlayerBuffDown
+FirePlayerBuffDown = HL.AddCoreOverride("Player.BuffDown",
+  function (self, Spell, AnyCaster, Offset)
+    local BaseCheck = FirePlayerBuffDown(self, Spell, AnyCaster, Offset)
+    if Spell == SpellFire.FuryoftheSunKingBuff then
+      return BaseCheck or Player:IsCasting(SpellFire.Pyroblast)
+    else
+      return BaseCheck
+    end
+  end
+, 63)
+
 HL.AddCoreOverride("Spell.IsReady",
   function (self, Range, AoESpell, ThisUnit, BypassRecovery, Offset)
     local BaseCheck = self:IsCastable() and self:IsUsableP()
     local MovingOK = true
-    if self:CastTime() > 0 and Player:IsMoving() and Settings.Fire.MovingRotation then
+    if self:CastTime() > 0 and Player:IsMoving() and Settings.Commons.MovingRotation then
       if self == SpellFire.Scorch or (self == SpellFire.Pyroblast and Player:BuffUp(SpellFire.HotStreakBuff)) or (self == SpellFire.Flamestrike and Player:BuffUp(SpellFire.HotStreakBuff)) then
         MovingOK = true
       else
@@ -120,7 +145,7 @@ HL.AddCoreOverride("Spell.IsReady",
 
 HL.AddCoreOverride("Spell.IsCastable",
   function (self, BypassRecovery, Range, AoESpell, ThisUnit, Offset)
-    if self:CastTime() > 0 and Player:IsMoving() and Settings.Arcane.MovingRotation then
+    if self:CastTime() > 0 and Player:IsMoving() and Settings.Commons.MovingRotation then
       return false
     end
 
@@ -161,7 +186,7 @@ local FrostOldSpellIsCastable
 FrostOldSpellIsCastable = HL.AddCoreOverride("Spell.IsCastable",
   function (self, BypassRecovery, Range, AoESpell, ThisUnit, Offset)
     local MovingOK = true
-    if self:CastTime() > 0 and Player:IsMoving() and Settings.Frost.MovingRotation then
+    if self:CastTime() > 0 and Player:IsMoving() and Settings.Commons.MovingRotation then
       if self == SpellFrost.Blizzard and Player:BuffUp(SpellFrost.FreezingRain) then
         MovingOK = true
       else
@@ -272,7 +297,7 @@ FrostOldTargetDebuffStack = HL.AddCoreOverride("Target.DebuffStack",
     if Spell == SpellFrost.WintersChillDebuff then
       if SpellFrost.Flurry:InFlight() then
         return 2
-      elseif SpellFrost.IceLance:InFlight() then
+      elseif SpellFrost.IceLance:InFlight() or Player:IsCasting(SpellFrost.GlacialSpike) or SpellFrost.GlacialSpike:InFlight() then
         if BaseCheck == 0 then
           return 0
         else

@@ -76,8 +76,6 @@ local VarPreferVT = false
 local Fiend = (S.Mindbender:IsAvailable()) and S.Mindbender or S.Shadowfiend
 local VarFiendUp = false
 local VarFiendRemains = 0
-local VarOpened = false
-local VarFirstTar = nil
 local Flay
 local GCDMax
 
@@ -97,8 +95,6 @@ HL:RegisterForEvent(function()
   VarPreferVT = false
   VarFiendUp = false
   VarFiendRemains = 0
-  VarOpened = false
-  VarFirstTar = nil
 end, "PLAYER_REGEN_ENABLED")
 
 HL:RegisterForEvent(function()
@@ -247,7 +243,6 @@ local function EvaluateCycleVTAoE2(TargetUnit)
 end
 
 local function Precombat()
-  VarFirstTar = Target:GUID()
   -- flask
   -- food
   -- augmentation
@@ -364,69 +359,6 @@ local function Trinkets()
   end
 end
 
-local function Opener()
-  -- shadow_crash,if=!debuff.vampiric_touch.up
-  if S.ShadowCrash:IsCastable() and not VarPreferVT and (Target:DebuffDown(S.VampiricTouchDebuff)) then
-    if Cast(S.ShadowCrash, Settings.Shadow.GCDasOffGCD.ShadowCrash, nil, not Target:IsInRange(40)) then return "shadow_crash opener 2"; end
-  end
-  -- vampiric_touch,if=!debuff.vampiric_touch.up&(!cooldown.shadow_crash.ready|!talent.shadow_crash)
-  if S.VampiricTouch:IsCastable() and (Target:DebuffDown(S.VampiricTouchDebuff) and (S.ShadowCrash:CooldownDown() or not S.ShadowCrash:IsAvailable())) then
-    if Cast(S.VampiricTouch, nil, nil, not Target:IsSpellInRange(S.VampiricTouch)) then return "vampiric_touch opener 3"; end
-  end
-  -- mindbender
-  if Fiend:IsCastable() then
-    if Cast(Fiend, Settings.Shadow.GCDasOffGCD.Mindbender) then return "mindbender opener 4"; end
-  end
-  -- dark_ascension,if=talent.dark_ascension
-  if S.DarkAscension:IsCastable() then
-    if Cast(S.DarkAscension, Settings.Shadow.GCDasOffGCD.DarkAscension) then return "dark_ascension opener 6"; end
-  end
-  if S.VoidEruption:IsAvailable() then
-    -- shadow_word_death,if=talent.inescapable_torment&talent.void_eruption&prev_gcd.mind_blast
-    -- Note: 20+ seconds since last cast, since we only want one cast during the opener.
-    if S.ShadowWordDeath:IsCastable() and S.InescapableTorment:IsAvailable() and Player:PrevGCDP(1, S.MindBlast) and S.ShadowWordDeath:TimeSinceLastCast() > 20 then
-      if Cast(S.ShadowWordDeath, Settings.Shadow.GCDasOffGCD.ShadowWordDeath, nil, not Target:IsSpellInRange(S.ShadowWordDeath)) then return "shadow_word_death opener 8"; end
-    end
-    -- mind_blast,if=talent.void_eruption
-    if S.MindBlast:IsCastable() then
-      if Cast(S.MindBlast, nil, nil, not Target:IsSpellInRange(S.MindBlast)) then return "mind_blast opener 10"; end
-    end
-    -- void_eruption,if=talent.void_eruption
-    if S.VoidEruption:IsCastable() then
-      if Cast(S.VoidEruption, Settings.Shadow.GCDasOffGCD.VoidEruption) then return "void_eruption opener 12"; end
-    end
-  end
-  -- power_infusion,if=buff.voidform.up|buff.dark_ascension.up
-  if CDsON() and S.PowerInfusion:IsCastable() and Settings.Shadow.SelfPI and (Player:BuffUp(S.VoidformBuff) or Player:BuffUp(S.DarkAscension)) then
-    if Cast(S.PowerInfusion, Settings.Shadow.OffGCDasOffGCD.PowerInfusion) then return "power_infusion opener 14"; end
-  end
-  -- use_items
-  if Settings.Commons.Enabled.Trinkets or Settings.Commons.Enabled.Items then
-    local ShouldReturn = Trinkets(); if ShouldReturn then return ShouldReturn; end
-  end
-  -- void_bolt,if=talent.void_eruption
-  if S.VoidBolt:IsCastable() then
-    if Cast(S.VoidBolt, nil, nil, not Target:IsInRange(40)) then return "void_bolt opener 16"; end
-  end
-  -- devouring_plague
-  if S.DevouringPlague:IsReady() then
-    if Cast(S.DevouringPlague, nil, nil, not Target:IsSpellInRange(S.DevouringPlague)) then return "devouring_plague opener 18"; end
-  end
-  -- Note: Just in case there is not enough Insanity for devouring_plague...
-  -- mind_blast
-  if S.MindBlast:IsCastable() then
-    if Cast(S.MindBlast, nil, nil, not Target:IsSpellInRange(S.MindBlast)) then return "mind_blast opener 20"; end
-  end
-  -- mind_spike
-  if S.MindSpike:IsCastable() then
-    if Cast(S.MindSpike, nil, nil, not Target:IsSpellInRange(S.MindSpike)) then return "mind_spike opener 22"; end
-  end
-  -- mind_flay
-  if S.MindFlay:IsCastable() then
-    if Cast(S.MindFlay, nil, nil, not Target:IsSpellInRange(S.MindFlay)) then return "mind_flay opener 24"; end
-  end
-end
-
 local function CDs()
   -- potion,if=buff.voidform.up|buff.power_infusion.up|buff.dark_ascension.up&(fight_remains<=cooldown.power_infusion.remains+15)|fight_remains<=30
   -- Note: The "fight_remains<=30" seems to be for dps sniping the end of a boss fight, so using BossFightRemains instead of FightRemains.
@@ -464,7 +396,7 @@ local function CDs()
   end
   -- divine_star,if=(raid_event.adds.up|spell_targets.belorrelos_the_suncaller>=5)&equipped.belorrelos_the_suncaller&trinket.belorrelos_the_suncaller.cooldown.remains<=gcd.max
   if S.DivineStar:IsReady() and (EnemiesCount10ySplash > 1 and I.BelorrelostheSuncaller:IsEquipped() and I.BelorrelostheSuncaller:CooldownRemains() <= GCDMax) then
-    if Cast(I.DivineStar, Settings.Shadow.GCDasOffGCD.DivineStar, not Target:IsInRange(30)) then return "divine_star cds 16"; end
+    if Cast(S.DivineStar, Settings.Shadow.GCDasOffGCD.DivineStar, not Target:IsInRange(30)) then return "divine_star cds 16"; end
   end
   -- power_infusion,if=(buff.voidform.up|buff.dark_ascension.up)
   if S.PowerInfusion:IsCastable() and Settings.Shadow.SelfPI and (Player:BuffUp(S.VoidformBuff) or Player:BuffUp(S.DarkAscension)) then
@@ -551,7 +483,7 @@ local function Filler()
   end
   -- shadow_word_pain,target_if=min:remains,if=!set_bonus.tier31_4pc
   -- Note: Per APL note, intent is to be used as a movement filler.
-  if S.ShadowWordPain:IsReady() and Player:IsMoving() and (Player:HasTier(31, 4)) then
+  if S.ShadowWordPain:IsReady() and Player:IsMoving() and (not Player:HasTier(31, 4)) then
     if Everyone.CastTargetIf(S.ShadowWordPain, Enemies40y, "min", EvaluateTargetIfFilterSWP, nil, not Target:IsSpellInRange(S.ShadowWordPain)) then return "shadow_word_pain filler 32"; end
   end
 end
@@ -592,8 +524,13 @@ local function AoE()
     if Everyone.CastTargetIf(S.ShadowWordDeath, Enemies40y, "max", EvaluateTargetIfFilterDPRemains, nil, not Target:IsSpellInRange(S.ShadowWordDeath)) then return "shadow_word_death aoe 14"; end
   end
   -- void_bolt,target_if=max:target.time_to_die
+  -- Note: If Target won't die soon, just cast on Target instead of using CastTargetIf. If Target TTD <= 4, then use CastTargetIf.
   if S.VoidBolt:IsCastable() then
-    if Everyone.CastTargetIf(S.VoidBolt, Enemies40y, "max", EvaluateTargetIfFilterTTD, nil, not Target:IsInRange(40)) then return "void_bolt aoe 16"; end
+    if Target:TimeToDie() > 4 then
+      if Cast(S.VoidBolt, nil, nil, not Target:IsInRange(40)) then return "void_bolt aoe 15"; end
+    else
+      if Everyone.CastTargetIf(S.VoidBolt, Enemies40y, "max", EvaluateTargetIfFilterTTD, nil, not Target:IsInRange(40)) then return "void_bolt aoe 16"; end
+    end
   end
   -- devouring_plague,target_if=max:target.time_to_die*(!dot.devouring_plague.ticking),if=talent.distorted_reality
   if S.DevouringPlague:IsReady() and (S.DistortedReality:IsAvailable()) then
@@ -636,8 +573,10 @@ local function AoE()
 end
 
 local function Main()
+  -- Reset variable.holding_crash to false for ST, in case it was set to true during AoE.
+  VarHoldingCrash = false
   -- variable,name=dots_up,op=set,value=active_dot.vampiric_touch=active_enemies|action.shadow_crash.in_flight&talent.whispering_shadows
-  VarDotsUp = S.VampiricTouchDebuff:AuraActiveCount() == EnemiesCount10ySplash or S.ShadowCrash:InFlight() and S.WhisperingShadows:IsAvailable()
+  VarDotsUp = S.VampiricTouchDebuff:AuraActiveCount() == EnemiesCount10ySplash or S.ShadowCrash:InFlight() and S.WhisperingShadows:IsAvailable() or Player:IsCasting(S.VampiricTouch) and S.Misery:IsAvailable()
   -- call_action_list,name=cds,if=fight_remains<30|target.time_to_die>15&(!variable.holding_crash|active_enemies>2)
   if CDsON() and (FightRemains < 30 or Target:TimeToDie() > 15 and (not VarHoldingCrash or EnemiesCount10ySplash > 2)) then
     local ShouldReturn = CDs(); if ShouldReturn then return ShouldReturn; end
@@ -683,8 +622,8 @@ local function Main()
     if Cast(S.ShadowCrash, Settings.Shadow.GCDasOffGCD.ShadowCrash, nil, not Target:IsInRange(40)) then return "shadow_crash main 20"; end
   end
   -- shadow_word_pain,if=buff.deaths_torment.stack>9&set_bonus.tier31_4pc&(!variable.holding_crash|!talent.shadow_crash)
-  if S.ShadowWordDeath:IsReady() and (Player:BuffStack(S.DeathsTormentBuff) > 9 and Player:HasTier(31, 4) and (not VarHoldingCrash or not S.ShadowCrash:IsAvailable())) then
-    if Cast(S.ShadowWordDeath, Settings.Shadow.GCDasOffGCD.ShadowWordDeath, nil, not Target:IsSpellInRange(S.ShadowWordDeath)) then return "shadow_word_death main 22"; end
+  if S.ShadowWordPain:IsReady() and (Player:BuffStack(S.DeathsTormentBuff) > 9 and Player:HasTier(31, 4) and (not VarHoldingCrash or not S.ShadowCrash:IsAvailable())) then
+    if Cast(S.ShadowWordPain, Settings.Shadow.GCDasOffGCD.ShadowWordPain, nil, not Target:IsSpellInRange(S.ShadowWordDeath)) then return "shadow_word_pain main 22"; end
   end
   -- shadow_word_death,if=variable.dots_up&talent.inescapable_torment&pet.fiend.active&((!talent.insidious_ire&!talent.idol_of_yoggsaron)|buff.deathspeaker.up)&!set_bonus.tier31_2pc
   if S.ShadowWordDeath:IsReady() and (VarDotsUp and S.InescapableTorment:IsAvailable() and VarFiendUp and ((not S.InsidiousIre:IsAvailable() and not S.IdolOfYoggSaron:IsAvailable()) or Player:BuffUp(S.DeathspeakerBuff)) and not Player:HasTier(31, 2)) then
@@ -754,14 +693,6 @@ local function APL()
     VarPreferVT = Settings.Shadow.PreferVTWhenSTinDungeon and EnemiesCount10ySplash == 1 and Player:IsInDungeonArea() and Player:IsInParty() and not Player:IsInRaidArea()
     -- variable,name=pool_for_cds,op=set,value=(cooldown.void_eruption.remains<=gcd.max*3&talent.void_eruption|cooldown.dark_ascension.up&talent.dark_ascension)|talent.void_torrent&talent.psychic_link&cooldown.void_torrent.remains<=4&(!raid_event.adds.exists&spell_targets.vampiric_touch>1|raid_event.adds.in<=5|raid_event.adds.remains>=6&!variable.holding_crash)&!buff.voidform.up
     VarPoolForCDs = ((S.VoidEruption:CooldownRemains() <= Player:GCD() * 3 and S.VoidEruption:IsAvailable() or S.DarkAscension:CooldownUp() and S.DarkAscension:IsAvailable()) or S.VoidTorrent:IsAvailable() and S.PsychicLink:IsAvailable() and S.VoidTorrent:CooldownRemains() <= 4 and Player:BuffDown(S.VoidformBuff))
-    -- Manually added: Attempt at an opener
-    if VarFirstTar == nil then VarFirstTar = Target:GUID() end
-    if VarOpened == false and Settings.Shadow.UseOpener and Target:GUID() == VarFirstTar and not DotsUp(Target, true) then
-      local ShouldReturn = Opener(); if ShouldReturn then return ShouldReturn; end
-      if HR.CastAnnotated(S.Pool, false, "WAIT") then return "Pool for Opener()"; end
-    else
-      VarOpened = true
-    end
     -- run_action_list,name=aoe,if=active_enemies>2
     if EnemiesCount10ySplash > 2 then
       local ShouldReturn = AoE(); if ShouldReturn then return ShouldReturn; end
@@ -777,7 +708,7 @@ local function Init()
   S.DevouringPlagueDebuff:RegisterAuraTracking()
   S.VampiricTouchDebuff:RegisterAuraTracking()
 
-  HR.Print("Shadow Priest rotation has been updated for patch 10.2.0.")
+  HR.Print("Shadow Priest rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(258, APL, Init)

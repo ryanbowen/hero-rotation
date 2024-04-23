@@ -18,6 +18,8 @@ local stringlower  = string.lower
 local strsplit     = strsplit
 local tostring     = tostring
 local GetTime      = GetTime
+-- API locals
+local GetItemInfo  = C_Item.GetItemInfo
 -- File Locals
 
 --- ======= GLOBALIZE =======
@@ -183,8 +185,9 @@ end
 function HR.CastAnnotated(Object, OffGCD, Text, OutofRange, FontSize)
   local Result = HR.Cast(Object, OffGCD, nil, OutofRange)
   -- TODO: handle small icon frame if OffGCD is true
+  local FontScale = (FontSize or 14) * HeroRotationDB.GUISettings["Scaling.ScaleUI"]
   if not OffGCD then
-    HR.MainIconFrame:OverlayText(Text, FontSize)
+    HR.MainIconFrame:OverlayText(Text, FontScale)
   end
   return Result
 end
