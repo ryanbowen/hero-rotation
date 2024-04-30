@@ -45,6 +45,8 @@ local OnUseExcludes = {
 local Equip = Player:GetEquipment()
 local Trinket1 = Equip[13] and Item(Equip[13]) or Item(0)
 local Trinket2 = Equip[14] and Item(Equip[14]) or Item(0)
+local Trinket1Level = Trinket1:Level() or 0
+local Trinket2Level = Trinket2:Level() or 0
 local Trinket1Spell = Trinket1:OnUseSpell()
 local Trinket2Spell = Trinket2:OnUseSpell()
 local Trinket1Range = (Trinket1Spell and Trinket1Spell.MaximumRange > 0 and Trinket1Spell.MaximumRange <= 100) and Trinket1Spell.MaximumRange or 100
@@ -64,14 +66,18 @@ local VarTrinket1BuffDuration = Trinket1:BuffDuration() + (num(Trinket1:ID() == 
 local VarTrinket2BuffDuration = Trinket2:BuffDuration() + (num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()) * 20) + (num(Trinket2:ID() == I.NymuesUnravelingSpindle:ID()) * 2)
 local VarTrinket1Sync = (VarTrinket1Buffs and (Trinket1:Cooldown() % 90 == 0 or 90 % Trinket1:Cooldown() == 0)) and 1 or 0.5
 local VarTrinket2Sync = (VarTrinket2Buffs and (Trinket2:Cooldown() % 90 == 0 or 90 % Trinket2:Cooldown() == 0)) and 1 or 0.5
-local VarDmgTrinketPriority = (not VarTrinket1Buffs and not VarTrinket2Buffs and Trinket2:Level() > Trinket1:Level()) and 2 or 1
-local VarTrinketPriority
-local TrinketCompare1 = ((Trinket2:Cooldown() / VarTrinket2BuffDuration) * (VarTrinket2Sync) * (1 - 0.5 * num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()))) or 0
-local TrinketCompare2 = (((Trinket1:Cooldown() / VarTrinket1BuffDuration) * (VarTrinket1Sync) * (1 - 0.5 * num(Trinket1:ID() == I.MirrorofFracturedTomorrows:ID()))) * (1 + ((Trinket1:Level() - Trinket2:Level()) / 100))) or 0
-if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and TrinketCompare1 > TrinketCompare2 then
-  VarTrinketPriority = 2
-else
-  VarTrinketPriority = 1
+-- Some logic to avoid processing a bunch of math when we're not using two on-use trinkets...
+local VarDmgTrinketPriority = (Trinket2Spell and not Trinket1Spell) and 2 or 1
+local VarTrinketPriority = (Trinket2Spell and not Trinket1Spell) and 2 or 1
+if Trinket1Spell and Trinket2Spell then
+  VarDmgTrinketPriority = (not VarTrinket1Buffs and not VarTrinket2Buffs and Trinket2Level > Trinket1Level) and 2 or 1
+  local TrinketCompare1 = ((Trinket2:Cooldown() / VarTrinket2BuffDuration) * (VarTrinket2Sync) * (1 - 0.5 * num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()))) or 0
+  local TrinketCompare2 = (((Trinket1:Cooldown() / VarTrinket1BuffDuration) * (VarTrinket1Sync) * (1 - 0.5 * num(Trinket1:ID() == I.MirrorofFracturedTomorrows:ID()))) * (1 + ((Trinket1Level - Trinket2Level) / 100))) or 0
+  if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and TrinketCompare1 > TrinketCompare2 then
+    VarTrinketPriority = 2
+  else
+    VarTrinketPriority = 1
+  end
 end
 
 -- Rotation Var
@@ -118,6 +124,8 @@ HL:RegisterForEvent(function()
   Equip = Player:GetEquipment()
   Trinket1 = Equip[13] and Item(Equip[13]) or Item(0)
   Trinket2 = Equip[14] and Item(Equip[14]) or Item(0)
+  Trinket1Level = Trinket1:Level() or 0
+  Trinket2Level = Trinket2:Level() or 0
   Trinket1Spell = Trinket1:OnUseSpell()
   Trinket2Spell = Trinket2:OnUseSpell()
   Trinket1Range = (Trinket1Spell and Trinket1Spell.MaximumRange > 0 and Trinket1Spell.MaximumRange <= 100) and Trinket1Spell.MaximumRange or 100
@@ -136,11 +144,18 @@ HL:RegisterForEvent(function()
   VarTrinket2BuffDuration = Trinket2:BuffDuration() + (num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()) * 20) + (num(Trinket2:ID() == I.NymuesUnravelingSpindle:ID()) * 2)
   VarTrinket1Sync = (VarTrinket1Buffs and (Trinket1:Cooldown() % 90 == 0 or 90 % Trinket1:Cooldown() == 0)) and 1 or 0.5
   VarTrinket2Sync = (VarTrinket2Buffs and (Trinket2:Cooldown() % 90 == 0 or 90 % Trinket2:Cooldown() == 0)) and 1 or 0.5
-  VarDmgTrinketPriority = (not VarTrinket1Buffs and not VarTrinket2Buffs and Trinket2:Level() > Trinket1:Level()) and 2 or 1
-  if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and ((Trinket2:Cooldown() / VarTrinket2BuffDuration) * (VarTrinket2Sync) * (1 - 0.5 * num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()))) > (((Trinket1:Cooldown() / VarTrinket1BuffDuration) * (VarTrinket1Sync) * (1 - 0.5 * num(Trinket1:ID() == I.MirrorofFracturedTomorrows:ID()))) * (1 + ((Trinket1:Level() - Trinket2:Level()) / 100))) then
-    VarTrinketPriority = 2
-  else
-    VarTrinketPriority = 1
+  -- Some logic to avoid processing a bunch of math when we're not using two on-use trinkets...
+  VarDmgTrinketPriority = (Trinket2Spell and not Trinket1Spell) and 2 or 1
+  VarTrinketPriority = (Trinket2Spell and not Trinket1Spell) and 2 or 1
+  if Trinket1Spell and Trinket2Spell then
+    VarDmgTrinketPriority = (not VarTrinket1Buffs and not VarTrinket2Buffs and Trinket2Level > Trinket1Level) and 2 or 1
+    local TrinketCompare1 = ((Trinket2:Cooldown() / VarTrinket2BuffDuration) * (VarTrinket2Sync) * (1 - 0.5 * num(Trinket2:ID() == I.MirrorofFracturedTomorrows:ID()))) or 0
+    local TrinketCompare2 = (((Trinket1:Cooldown() / VarTrinket1BuffDuration) * (VarTrinket1Sync) * (1 - 0.5 * num(Trinket1:ID() == I.MirrorofFracturedTomorrows:ID()))) * (1 + ((Trinket1Level - Trinket2Level) / 100))) or 0
+    if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and TrinketCompare1 > TrinketCompare2 then
+      VarTrinketPriority = 2
+    else
+      VarTrinketPriority = 1
+    end
   end
 end, "PLAYER_EQUIPMENT_CHANGED")
 
@@ -275,9 +290,9 @@ local function Precombat()
   if S.PowerSiphon:IsReady() and (Player:BuffStack(S.DemonicCoreBuff) + mathmax(WildImpsCount(), 2) <= 4 or Player:BuffRemains(S.DemonicCoreBuff) < 3) then
     if Cast(S.PowerSiphon, Settings.Demonology.GCDasOffGCD.PowerSiphon) then return "power_siphon precombat 2"; end
   end
-  -- Manually added: demonbolt,if=fight_style.dungeonroute&!target.is_boss&buff.demonic_core.up
-  -- Note: This is to avoid suggesting ShadowBolt on a new dungeon pack when we have Demonic Core buff stacks.
-  if S.Demonbolt:IsReady() and Player:IsInDungeonArea() and not Target:IsInBossList() and Player:BuffUp(S.DemonicCoreBuff) then
+  -- Manually added: demonbolt,if=!target.is_boss&buff.demonic_core.up
+  -- Note: This is to avoid suggesting ShadowBolt on a new pack of mobs when we have Demonic Core buff stacks.
+  if S.Demonbolt:IsReady() and not Target:IsInBossList() and Player:BuffUp(S.DemonicCoreBuff) then
     if Cast(S.Demonbolt, nil, nil, not Target:IsSpellInRange(S.Demonbolt)) then return "demonbolt precombat 3"; end
   end
   -- demonbolt,if=!buff.power_siphon.up
@@ -479,7 +494,8 @@ local function Tyrant()
     if Cast(S.HandofGuldan, nil, nil, not Target:IsSpellInRange(S.HandofGuldan)) then return "hand_of_guldan tyrant 24"; end
   end
   -- demonbolt,cycle_targets=1,if=soul_shard<4&(buff.demonic_core.stack>1)&(buff.vilefiend.up|!talent.summon_vilefiend&buff.dreadstalkers.up)
-  if S.Demonbolt:IsReady() and (SoulShards < 4 and (Player:BuffStack(S.DemonicCoreBuff) > 1) and (VilefiendActive() or not S.SummonVilefiend:IsAvailable() and DreadstalkerActive())) then
+  -- Note: Added 'not CDsON()' check to avoid having the profile ignore Demonbolt when Vilefiend is being held.
+  if S.Demonbolt:IsReady() and (SoulShards < 4 and (Player:BuffStack(S.DemonicCoreBuff) > 1) and (VilefiendActive() or not S.SummonVilefiend:IsAvailable() and DreadstalkerActive() or not CDsON())) then
     if S.DoomBrandDebuff:AuraActiveCount() == EnemiesCount8ySplash or not Player:HasTier(31, 2) then
       if Cast(S.Demonbolt, nil, nil, not Target:IsSpellInRange(S.Demonbolt)) then return "demonbolt tyrant 26"; end
     else
@@ -520,7 +536,7 @@ local function FightEnd()
     if Cast(S.SummonDemonicTyrant, Settings.Demonology.GCDasOffGCD.SummonDemonicTyrant) then return "summon_demonic_tyrant fight_end 10"; end
   end
   -- demonic_strength,if=fight_remains<10
-  if CDsON() and S.DemonicStrength:IsCastable() and (BossFightRemains < 10) then
+  if S.DemonicStrength:IsCastable() and (BossFightRemains < 10) then
     if Cast(S.DemonicStrength, Settings.Demonology.GCDasOffGCD.DemonicStrength) then return "demonic_strength fight_end 12"; end
   end
   -- power_siphon,if=buff.demonic_core.stack<3&fight_remains<20
@@ -628,7 +644,7 @@ local function APL()
       if Cast(S.PowerSiphon, Settings.Demonology.GCDasOffGCD.PowerSiphon) then return "power_siphon main 10"; end
     end
     -- demonic_strength,if=buff.nether_portal.remains<gcd.max&!(raid_event.adds.in<45-raid_event.add.duration)
-    if CDsON() and S.DemonicStrength:IsCastable() and (Player:BuffRemains(S.NetherPortalBuff) < GCDMax) then
+    if S.DemonicStrength:IsCastable() and (Player:BuffRemains(S.NetherPortalBuff) < GCDMax) then
       if Cast(S.DemonicStrength, Settings.Demonology.GCDasOffGCD.DemonicStrength) then return "demonic_strength main 12"; end
     end
     -- bilescourge_bombers
