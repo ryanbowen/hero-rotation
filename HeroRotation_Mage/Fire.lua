@@ -412,7 +412,7 @@ local function CombustionPhase()
   end
   -- fire_blast from below
   if S.FireBlast:IsReady() and not FreeCastAvailable() and (not var_fire_blast_pooling and (not ImprovedScorchActive() or Player:IsCasting(S.Scorch) or Target:DebuffRemains(S.ImprovedScorchDebuff) > 4 * GCDMax) and (Player:BuffDown(S.FuryoftheSunKingBuff) or Player:IsCasting(S.Pyroblast)) and CombustionUp and Player:BuffDown(S.HyperthermiaBuff) and Player:BuffDown(S.HotStreakBuff) and HotStreakInFlight() + num(Player:BuffUp(S.HeatingUpBuff)) * num(Player:GCDRemains() > 0) < 2) then
-    if FBCast(S.FireBlast) then return "fire_blast combustion_phase 20"; end
+    if CastLeft(S.FireBlast) then return "fire_blast combustion_phase 20"; end
   end
   -- flamestrike,if=buff.combustion.down&buff.fury_of_the_sun_king.up&buff.fury_of_the_sun_king.remains>cast_time&buff.fury_of_the_sun_king.expiration_delay_remains=0&cooldown.combustion.remains<cast_time&active_enemies>=variable.skb_flamestrike
   -- TODO: Handle expiration_delay_remains
@@ -536,7 +536,7 @@ local function FirestarterFireBlasts()
   -- fire_blast,use_off_gcd=1,if=!variable.fire_blast_pooling&buff.heating_up.react+hot_streak_spells_in_flight=1&(talent.feel_the_burn&buff.feel_the_burn.remains<gcd.remains|cooldown.shifting_power.ready&(!set_bonus.tier30_2pc|debuff.charring_embers.remains>2*gcd.max))
   -- Note: Added check to not cast Fire Blast when HotStreakBuff is active.
   if S.FireBlast:IsReady() and not FreeCastAvailable() and (not var_fire_blast_pooling and num(Player:BuffUp(S.HeatingUpBuff)) + HotStreakInFlight() == 1 and (S.ShiftingPower:CooldownUp() and (not Player:HasTier(30, 2) or Target:DebuffRemains(S.CharringEmbersDebuff) > 2 * GCDMax))) then
-    if FBCast(S.FireBlast) then return "fire_blast firestarter_fire_blasts 4"; end
+    if CastLeft(S.FireBlast) then return "fire_blast firestarter_fire_blasts 4"; end
   end
 end
 
@@ -556,7 +556,7 @@ local function StandardRotation()
   -- Note: fire_blast moved from below.
   -- Note: Removed Hyperthermia timings, as it caused Fire Blast to only quickly appear in the last 0.5s of a Fireball/Pyroblast cast.
   if S.FireBlast:IsReady() and not FreeCastAvailable() and (not FirestarterActive() and not var_fire_blast_pooling and Player:BuffDown(S.FuryoftheSunKingBuff) and (((Player:IsCasting(S.Fireball) or Player:IsCasting(S.Pyroblast)) and Player:BuffUp(S.HeatingUpBuff)) or (SearingTouchActive() and (not ImprovedScorchActive() or Target:DebuffStack(S.ImprovedScorchDebuff) == var_improved_scorch_max_stack or S.FireBlast:FullRechargeTime() < 3) and (Player:BuffUp(S.HeatingUpBuff) and not Player:IsCasting(S.Scorch) or Player:BuffDown(S.HotStreakBuff) and Player:BuffDown(S.HeatingUpBuff) and Player:IsCasting(S.Scorch) and HotStreakInFlight() == 0)))) then
-    if FBCast(S.FireBlast) then return "fire_blast standard_rotation 16"; end
+    if CastLeft(S.FireBlast) then return "fire_blast standard_rotation 16"; end
   end
   -- flamestrike,if=active_enemies>=variable.skb_flamestrike&buff.fury_of_the_sun_king.up&buff.fury_of_the_sun_king.expiration_delay_remains=0"
   if AoEON() and S.Flamestrike:IsReady() and not Player:IsCasting(S.Flamestrike) and (EnemiesCount8ySplash >= var_skb_flamestrike and Player:BuffUp(S.FuryoftheSunKingBuff)) then
@@ -813,7 +813,7 @@ local function APL()
     end
     -- fire_blast,use_off_gcd=1,use_while_casting=1,if=!variable.fire_blast_pooling&variable.time_to_combustion>0&active_enemies>=variable.hard_cast_flamestrike&!firestarter.active&!buff.hot_streak.react&(buff.heating_up.react&action.flamestrike.execute_remains<0.5|charges_fractional>=2)
     if S.FireBlast:IsReady() and not FreeCastAvailable() and (not var_fire_blast_pooling and var_time_to_combustion > 0 and EnemiesCount8ySplash >= var_hard_cast_flamestrike and not FirestarterActive() and Player:BuffDown(S.HotStreakBuff) and (Player:BuffUp(S.HeatingUpBuff) and S.Flamestrike:ExecuteRemains() < 0.5 or S.FireBlast:ChargesFractional() >= 2)) then
-      if FBCast(S.FireBlast) then return "fire_blast main 28"; end
+      if CastLeft(S.FireBlast) then return "fire_blast main 28"; end
     end
     -- call_action_list,name=firestarter_fire_blasts,if=buff.combustion.down&firestarter.active&variable.time_to_combustion>0
     if CombustionDown and FirestarterActive() and var_time_to_combustion > 0 then
