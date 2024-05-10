@@ -574,7 +574,7 @@ local function StandardRotation()
   -- fire_blast,use_off_gcd=1,use_while_casting=1,if=!firestarter.active&!variable.fire_blast_pooling&buff.fury_of_the_sun_king.down&(((action.fireball.executing&(action.fireball.execute_remains<0.5|!talent.hyperthermia)|action.pyroblast.executing&(action.pyroblast.execute_remains<0.5|!talent.hyperthermia))&buff.heating_up.react)|(searing_touch.active&(!improved_scorch.active|debuff.improved_scorch.stack=debuff.improved_scorch.max_stack|full_recharge_time<3)&(buff.heating_up.react&!action.scorch.executing|!buff.hot_streak.react&!buff.heating_up.react&action.scorch.executing&!hot_streak_spells_in_flight)))
   -- Note: Moved above previous 3 lines, due to use_while_casting.
   -- pyroblast,if=prev_gcd.1.scorch&buff.heating_up.react&searing_touch.active&active_enemies<variable.hot_streak_flamestrike
-  if S.Pyroblast:IsReady() and ((Player:IsCasting(S.Scorch) or Player:PrevGCDP(1, S.Scorch)) and Player:BuffUp(S.HeatingUpBuff) and SearingTouchActive() and EnemiesCount8ySplash < var_hot_streak_flamestrike) then
+  if S.Pyroblast:IsReady() and (((Player:IsCasting(S.Scorch) and Player:BuffUp(S.HeatingUpBuff)) or (Player:PrevGCDP(1, S.Scorch) and Player:BuffUp(S.HotStreakBuff))) and SearingTouchActive() and EnemiesCount8ySplash < var_hot_streak_flamestrike) then
     if PBCast(S.Pyroblast, nil, nil, not Target:IsSpellInRange(S.Pyroblast)) then return "pyroblast standard_rotation 18"; end
   end
   -- scorch,if=improved_scorch.active&debuff.improved_scorch.remains<4*gcd.max
@@ -797,6 +797,10 @@ local function APL()
     if not var_fire_blast_pooling and S.SunKingsBlessing:IsAvailable() then
       var_fire_blast_pooling = SearingTouchActive() and S.FireBlast:FullRechargeTime() > 3 * GCDMax
     end
+    -- Note: fire_blast from below. Moved above shifting_power, as it's intended to be used during it's cast.
+    if S.FireBlast:IsReady() and not FreeCastAvailable() and (Player:IsChanneling(S.ShiftingPower) and S.FireBlast:FullRechargeTime() < ShiftingPowerTickReduction) then
+      if FBCast(S.FireBlast) then return "fire_blast main 30"; end
+    end
     -- shifting_power,if=buff.combustion.down&(action.fire_blast.charges=0|variable.fire_blast_pooling)&(!improved_scorch.active|debuff.improved_scorch.remains>cast_time+action.scorch.cast_time&!buff.fury_of_the_sun_king.up)&!buff.hot_streak.react&variable.shifting_power_before_combustion
     if S.ShiftingPower:IsReady() and (CombustionDown and (S.FireBlast:Charges() == 0 or var_fire_blast_pooling) and (not ImprovedScorchActive() or Target:DebuffRemains(S.ImprovedScorchDebuff) > S.ShiftingPower:CastTime() + S.Scorch:CastTime() and Player:BuffDown(S.FuryoftheSunKingBuff)) and Player:BuffDown(S.HotStreakBuff) and var_shifting_power_before_combustion) then
       if Cast(S.ShiftingPower, nil, Settings.CommonsDS.DisplayStyle.Signature, not Target:IsInRange(18)) then return "shifting_power main 26"; end
@@ -820,9 +824,7 @@ local function APL()
       local ShouldReturn = FirestarterFireBlasts(); if ShouldReturn then return ShouldReturn; end
     end
     -- fire_blast,use_while_casting=1,if=action.shifting_power.executing&full_recharge_time<action.shifting_power.tick_reduction
-    if S.FireBlast:IsReady() and not FreeCastAvailable() and (Player:IsCasting(S.ShiftingPower) and S.FireBlast:FullRechargeTime() < ShiftingPowerTickReduction) then
-      if FBCast(S.FireBlast) then return "fire_blast main 30"; end
-    end
+    -- Note: Moved above shifting_power, as this is intended to be used during its cast.
     -- call_action_list,name=standard_rotation,if=variable.time_to_combustion>0&buff.combustion.down
     if var_time_to_combustion > 0 and CombustionDown then
       local ShouldReturn = StandardRotation(); if ShouldReturn then return ShouldReturn; end
