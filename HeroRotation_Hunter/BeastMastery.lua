@@ -428,16 +428,14 @@ local function APL()
   end
 
   -- Pet Management; Conditions handled via override
-  if not (Player:IsMounted() or Player:IsInVehicle()) then
-    if S.SummonPet:IsCastable() then
-      if Cast(SummonPetSpells[Settings.Commons.SummonPetSlot], Settings.CommonsOGCD.GCDasOffGCD.SummonPet) then return "Summon Pet"; end
-    end
-    if S.RevivePet:IsCastable() then
-      if Cast(S.RevivePet, Settings.CommonsOGCD.GCDasOffGCD.RevivePet) then return "Revive Pet"; end
-    end
-    if S.MendPet:IsCastable() then
-      if Cast(S.MendPet, Settings.CommonsOGCD.GCDasOffGCD.MendPet) then return "Mend Pet High Priority"; end
-    end
+  if S.SummonPet:IsCastable() then
+    if Cast(SummonPetSpells[Settings.Commons.SummonPetSlot], Settings.CommonsOGCD.GCDasOffGCD.SummonPet) then return "Summon Pet"; end
+  end
+  if S.RevivePet:IsCastable() then
+    if Cast(S.RevivePet, Settings.CommonsOGCD.GCDasOffGCD.RevivePet) then return "Revive Pet"; end
+  end
+  if S.MendPet:IsCastable() then
+    if Cast(S.MendPet, Settings.CommonsOGCD.GCDasOffGCD.MendPet) then return "Mend Pet High Priority"; end
   end
 
   if Everyone.TargetIsValid() then
@@ -466,7 +464,7 @@ local function APL()
     end
     -- Manually added pet healing
     -- Conditions handled via Overrides
-    if not (Player:IsMounted() or Player:IsInVehicle()) and S.MendPet:IsCastable() then
+    if S.MendPet:IsCastable() then
       if Cast(S.MendPet) then return "Mend Pet Low Priority (w/ Target)"; end
     end
     -- Pool Focus if nothing else to do
@@ -475,7 +473,7 @@ local function APL()
 
   -- Note: We have to put it again in case we don't have a target but our pet is dying.
   -- Conditions handled via Overrides
-  if not (Player:IsMounted() or Player:IsInVehicle()) and S.MendPet:IsCastable() then
+  if S.MendPet:IsCastable() then
     if Cast(S.MendPet) then return "Mend Pet Low Priority (w/o Target)"; end
   end
 end
