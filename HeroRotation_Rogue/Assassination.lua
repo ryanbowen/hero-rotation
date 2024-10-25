@@ -382,10 +382,10 @@ local function Stealthed (ReturnSpellOnly, ForceStealth)
   end
 
   -- actions.stealthed+=/envenom,if=effective_combo_points>=variable.effective_spend_cp&dot.kingsbane.ticking
-  -- &buff.envenom.remains<=3&(debuff.deathstalkers_mark.up|buff.edge_case.up|buff.cold_blood.up)
+  -- &buff.envenom.remains<=3&(debuff.deathstalkers_mark.up|buff.cold_blood.up)
   -- actions.stealthed+=/envenom,if=effective_combo_points>=variable.effective_spend_cp&buff.master_assassin_aura.up
-  -- &variable.single_target&(debuff.deathstalkers_mark.up|buff.edge_case.up|buff.cold_blood.up)
-  if ComboPoints >= EffectiveCPSpend and (Target:DebuffUp(S.DeathStalkersMarkDebuff) or Player:BuffUp(S.EdgeCase) or Player:BuffUp(S.ColdBlood)) then
+  -- &variable.single_target&(debuff.deathstalkers_mark.up|buff.cold_blood.up)
+  if ComboPoints >= EffectiveCPSpend and (Target:DebuffUp(S.DeathStalkersMarkDebuff) or Player:BuffUp(S.ColdBlood)) then
     if Target:DebuffUp(S.Kingsbane) and Player:BuffRemains(S.Envenom) <= 3 then
       if ReturnSpellOnly then
         return S.Envenom
@@ -533,8 +533,9 @@ local function Vanish ()
   end
 
   -- # Vanish to fish for Fateful Ending
-  -- actions.vanish+=/vanish,if=!buff.fatebound_lucky_coin.up&(buff.fatebound_coin_tails.stack>=5|buff.fatebound_coin_heads.stack>=5)
-  if S.Vanish:IsCastable() and Player:BuffDown(S.FateboundLuckyCoin) and
+  -- actions.vanish+=/vanish,if=!buff.fatebound_lucky_coin.up&effective_combo_points>=variable.effective_spend_cp
+  -- &(buff.fatebound_coin_tails.stack>=5|buff.fatebound_coin_heads.stack>=5)
+  if S.Vanish:IsCastable() and Player:BuffDown(S.FateboundLuckyCoin) and ComboPoints >= EffectiveCPSpend
     (Player:BuffStack(S.FateboundCoinTails) >= 5 or Player:BuffStack(S.FateboundCoinHeads) >= 5) then
     ShouldReturn = StealthMacro(S.Vanish)
     if ShouldReturn then
@@ -843,14 +844,12 @@ local function CDs ()
     end
   end
 
-  -- actions.cds+=/cold_blood,if=!buff.edge_case.up&cooldown.deathmark.remains>10&!buff.darkest_night.up
-  -- &combo_points>=variable.effective_spend_cp&(variable.not_pooling|debuff.amplifying_poison.stack>=20
-  -- |!variable.single_target)&!buff.vanish.up&(!cooldown.kingsbane.up|!variable.single_target)&!cooldown.deathmark.up
+  -- # Cold Blood for Edge Case or Envenoms during shiv
+  -- actions.cds+=/cold_blood,use_off_gcd=1,if=(buff.fatebound_coin_tails.stack>0&buff.fatebound_coin_heads.stack>0)
+  -- |debuff.shiv.up&(cooldown.deathmark.remains>50|!talent.inevitabile_end&effective_combo_points>=variable.effective_spend_cp)
   if S.ColdBlood:IsReady() and Player:DebuffDown(S.ColdBlood) then
-    if Player:BuffDown(S.EdgeCase) and S.Deathmark:CooldownRemains() > 10 and Player:BuffDown(S.DarkestNightBuff)
-      and ComboPoints >= EffectiveCPSpend and (NotPooling or (Target:DebuffStack(S.AmplifyingPoisonDebuff) + Target:DebuffStack(S.AmplifyingPoisonDebuffDeathmark)) >= 20
-      or not SingleTarget) and Player:BuffDown(Rogue.VanishBuffSpell()) and (not S.Kingsbane:CooldownUp() or not SingleTarget)
-      and not S.Deathmark:CooldownUp() then
+    if (Player:BuffStack(S.FateboundCoinTails) > 0 or Player:BuffStack(S.FateboundCoinHeads) > 0)
+      or Target:DebuffUp(S.ShivDebuff) and (S.Deathmark:CooldownRemains() > 50 or not S.InevitabileEnd:IsAvailable() and ComboPoints >= EffectiveCPSpend) then
       if Cast(S.ColdBlood, Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood) then
         return "Cast Cold Blood"
       end

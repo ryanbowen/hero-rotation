@@ -105,6 +105,7 @@ Spell.Rogue.Commons = {
   HandOfFate              = Spell(452536),
   ImprovedAmbush          = Spell(381620),
   FateboundInevitability  = Spell(454434),
+  InevitabileEnd          = Spell(454434),
   Inevitability           = Spell(382512),
   LingeringDarkness       = Spell(457056),
   LingeringDarknessBuff   = Spell(457273),
