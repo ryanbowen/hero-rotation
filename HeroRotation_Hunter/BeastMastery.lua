@@ -294,78 +294,74 @@ local function ST()
   if S.KillCommand:IsReady() and (S.CalloftheWild:IsAvailable() and S.CalloftheWild:CooldownRemains() < Player:GCD() + 0.25) then
     if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 6"; end
   end
-  -- multishot,if=buff.beast_cleave.remains<gcd*1.25&talent.bleak_powder&(buff.deathblow.up|(cooldown.black_arrow.remains<gcd&(target.health.pct<20|target.health.pct>81)))
-  if S.MultiShot:IsReady() and (Pet:BuffRemains(S.BeastCleavePetBuff) < Player:GCD() * 1.25 and S.BleakPowder:IsAvailable() and (Player:BuffUp(S.DeathblowBuff) or (S.BlackArrow:CooldownRemains() < Player:GCD() and (Target:HealthPercentage() < 20 or Target:HealthPercentage() > 81)))) then
-    if Cast(S.MultiShot, nil, nil, not Target:IsSpellInRange(S.MultiShot)) then return "multishot st 8"; end
-  end
-  -- black_arrow
-  if S.BlackArrow:IsReady() then
-    if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow st 10"; end
+  -- kill_shot,target_if=min:dot.serpent_sting.remains,if=talent.venoms_bite&(!active_dot.serpent_sting|dot.serpent_sting.refreshable)
+  if S.KillShot:IsReady() and (S.VenomsBite:IsAvailable()) then
+    if Everyone.CastTargetIf(S.KillShot, Enemies40y, "min", EvaluateTargetIfFilterSerpentSting, EvaluateTargetIfKillShotST, not Target:IsSpellInRange(S.KillShot)) then return "kill_shot st 8"; end
   end
   -- call_of_the_wild
   if CDsON() and S.CalloftheWild:IsCastable() then
-    if Cast(S.CalloftheWild, Settings.BeastMastery.GCDasOffGCD.CallOfTheWild) then return "call_of_the_wild st 12"; end
+    if Cast(S.CalloftheWild, Settings.BeastMastery.GCDasOffGCD.CallOfTheWild) then return "call_of_the_wild st 10"; end
   end
   -- bloodshed
   if S.Bloodshed:IsCastable() then
-    if Cast(S.Bloodshed, Settings.BeastMastery.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed st 14"; end
+    if Cast(S.Bloodshed, Settings.BeastMastery.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed st 12"; end
   end
   -- bestial_wrath
   if CDsON() and S.BestialWrath:IsCastable() then
-    if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath st 16"; end
+    if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath st 14"; end
+  end
+  -- kill_command,if=cooldown.kill_command.full_recharge_time<1.25*gcd
+  if S.KillCommand:IsCastable() and (S.KillCommand:FullRechargeTime() < 1.25 * Player:GCD()) then
+    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 16"; end
+  end
+  -- multishot,if=buff.beast_cleave.remains<gcd*1.25&talent.bleak_powder&(buff.deathblow.up|(cooldown.black_arrow.remains<gcd&(target.health.pct<20|target.health.pct>81)))
+  if S.MultiShot:IsReady() and (Pet:BuffRemains(S.BeastCleavePetBuff) < Player:GCD() * 1.25 and S.BleakPowder:IsAvailable() and (Player:BuffUp(S.DeathblowBuff) or (S.BlackArrow:CooldownRemains() < Player:GCD() and (Target:HealthPercentage() < 20 or Target:HealthPercentage() > 81)))) then
+    if Cast(S.MultiShot, nil, nil, not Target:IsSpellInRange(S.MultiShot)) then return "multishot st 18"; end
+  end
+  -- black_arrow
+  if S.BlackArrow:IsReady() then
+    if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow st 20"; end
   end
   -- kill_command
   if S.KillCommand:IsReady() then
-    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 18"; end
+    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 22"; end
   end
   -- dire_beast
   if S.DireBeast:IsCastable() then
-    if Cast(S.DireBeast, Settings.BeastMastery.GCDasOffGCD.DireBeast, nil, not Target:IsSpellInRange(S.DireBeast)) then return "dire_beast st 20"; end
-  end
-  -- kill_shot,target_if=min:dot.serpent_sting.remains,if=talent.venoms_bite&(!active_dot.serpent_sting|dot.serpent_sting.refreshable)
-  if S.KillShot:IsReady() and (S.VenomsBite:IsAvailable()) then
-    if Everyone.CastTargetIf(S.KillShot, Enemies40y, "min", EvaluateTargetIfFilterSerpentSting, EvaluateTargetIfKillShotST, not Target:IsSpellInRange(S.KillShot)) then return "kill_shot st 22"; end
+    if Cast(S.DireBeast, Settings.BeastMastery.GCDasOffGCD.DireBeast, nil, not Target:IsSpellInRange(S.DireBeast)) then return "dire_beast st 24"; end
   end
   -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=talent.wild_call&charges_fractional>1.4|buff.call_of_the_wild.up|full_recharge_time<gcd&cooldown.bestial_wrath.remains|talent.scent_of_blood&(cooldown.bestial_wrath.remains<12+gcd)|talent.furious_assault|talent.black_arrow&(talent.barbed_scales|talent.savagery)|fight_remains<9
   if S.BarbedShot:IsCastable() then
-    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, EvaluateTargetIfBarbedShotST, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot st 24"; end
-  end
-  -- kill_shot
-  if S.KillShot:IsReady() then
-    if Cast(S.KillShot, nil, nil, not Target:IsSpellInRange(S.KillShot)) then return "kill_shot st 26"; end
+    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, EvaluateTargetIfBarbedShotST, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot st 26"; end
   end
   -- cobra_shot,if=buff.bestial_wrath.up&talent.killer_cobra
   if S.CobraShot:IsReady() and (Player:BuffUp(S.BestialWrathBuff) and S.KillerCobra:IsAvailable()) then
     if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot st 28"; end
   end
-  -- explosive_shot,if=!buff.bestial_wrath.up&talent.killer_cobra|!talent.killer_cobra
-  if S.ExplosiveShot:IsReady() and (Player:BuffDown(S.BestialWrathBuff) and S.KillerCobra:IsAvailable() or not S.KillerCobra:IsAvailable()) then
-    if Cast(S.ExplosiveShot, Settings.CommonsOGCD.GCDasOffGCD.ExplosiveShot, nil, not Target:IsSpellInRange(S.ExplosiveShot)) then return "explosive_shot st 30"; end
-  end
-  -- kill_shot,if=talent.venoms_bite|target.health.pct<20
-  if S.KillShot:IsReady() and (S.VenomsBite:IsAvailable() or Target:HealthPercentage() < 20) then
-    if Cast(S.KillShot, nil, nil, not Target:IsSpellInRange(S.KillShot)) then return "kill_shot st 32"; end
+  -- kill_shot
+  if S.KillShot:IsReady() then
+    if Cast(S.KillShot, nil, nil, not Target:IsSpellInRange(S.KillShot)) then return "kill_shot st 30"; end
   end
   -- lights_judgment,if=buff.bestial_wrath.down|target.time_to_die<5
   if CDsON() and S.LightsJudgment:IsCastable() and (Player:BuffDown(S.BestialWrathBuff) or Target:TimeToDie() < 5) then
-    if Cast(S.LightsJudgment, Settings.CommonsOGCD.OffGCDasOffGCD.Racials, nil, not Target:IsInRange(5)) then return "lights_judgment st 34"; end
+    if Cast(S.LightsJudgment, Settings.CommonsOGCD.OffGCDasOffGCD.Racials, nil, not Target:IsInRange(5)) then return "lights_judgment st 32"; end
   end
   -- cobra_shot
   if S.CobraShot:IsReady() then
-    if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot st 36"; end
+    if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot st 34"; end
   end
   if CDsON() then
     -- bag_of_tricks,if=buff.bestial_wrath.down|target.time_to_die<5
     if S.BagofTricks:IsCastable() and (Player:BuffDown(S.BestialWrathBuff) or FightRemains < 5) then
-      if Cast(S.BagofTricks, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "bag_of_tricks st 38"; end
+      if Cast(S.BagofTricks, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "bag_of_tricks st 36"; end
     end
     -- arcane_pulse,if=buff.bestial_wrath.down|target.time_to_die<5
     if S.ArcanePulse:IsCastable() and (Player:BuffDown(S.BestialWrathBuff) or FightRemains < 5) then
-      if Cast(S.ArcanePulse, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "arcane_pulse st 40"; end
+      if Cast(S.ArcanePulse, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "arcane_pulse st 38"; end
     end
     -- arcane_torrent,if=(focus+focus.regen+15)<focus.max
     if S.ArcaneTorrent:IsCastable() and ((Player:Focus() + Player:FocusRegen() + 15) < Player:FocusMax()) then
-      if Cast(S.ArcaneTorrent, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "arcane_torrent st 42"; end
+      if Cast(S.ArcaneTorrent, Settings.CommonsOGCD.OffGCDasOffGCD.Racials) then return "arcane_torrent st 40"; end
     end
   end
 end
@@ -455,8 +451,6 @@ local function APL()
     end
     -- Interrupts
      local ShouldReturn = Everyone.Interrupt(S.CounterShot, Settings.CommonsDS.DisplayStyle.Interrupts, StunInterrupts); if ShouldReturn then return ShouldReturn; end
-     -- variable,name=cotw_ready,value=!raid_event.adds.exists&((!trinket.1.has_use_buff|trinket.1.cooldown.remains>30|trinket.1.cooldown.ready|trinket.1.cooldown.remains+cooldown.call_of_the_wild.duration+15>fight_remains)&(!trinket.2.has_use_buff|trinket.2.cooldown.remains>30|trinket.2.cooldown.ready|trinket.2.cooldown.remains+cooldown.call_of_the_wild.duration+15>fight_remains)|fight_remains<cooldown.call_of_the_wild.duration+20)|raid_event.adds.exists&(!raid_event.adds.up&(raid_event.adds.duration+raid_event.adds.in<25|raid_event.adds.in>60)|raid_event.adds.up&raid_event.adds.remains>10)|fight_remains<25
-     -- Note: We can't predict raid_event.adds, so leaving this variable as always true.
     -- auto_shot
     -- call_action_list,name=cds
     if CDsON() then
