@@ -81,13 +81,17 @@ Spell.Hunter.Commons = {
 }
 
 Spell.Hunter.DarkRanger = {
-  -- Talents
+  -- Abilities
   BlackArrow                            = Spell(466930),
+  -- Talents
+  BlackArrowTalent                      = Spell(466932),
+  BleakPowder                           = Spell(467911),
 }
 
 Spell.Hunter.PackLeader = {
   -- Talents
   CulltheHerd                           = Spell(445717),
+  FuriousAssault                        = Spell(445699),
   HowlofthePack                         = Spell(445707),
   ViciousHunt                           = Spell(445404),
   -- Buffs
@@ -115,6 +119,7 @@ Spell.Hunter.BeastMastery = MergeTableByKey(Spell.Hunter.Commons, {
   AMurderofCrows                        = Spell(131894),
   AnimalCompanion                       = Spell(267116),
   AspectoftheWild                       = Spell(193530),
+  BarbedScales                          = Spell(469880),
   BarbedShot                            = Spell(217200),
   BeastCleave                           = Spell(115939),
   BestialWrath                          = Spell(19574),
