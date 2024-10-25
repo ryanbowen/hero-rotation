@@ -53,7 +53,6 @@ local Settings = {
 }
 
 --- ===== Rotation Variables =====
-local GCDMax
 local BossFightRemains = 11111
 local FightRemains = 11111
 local VarSyncActive = false
@@ -220,7 +219,7 @@ local function Cleave()
     if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot cleave 2"; end
   end
   -- multishot,if=pet.main.buff.beast_cleave.remains<0.25+gcd&(!talent.bloody_frenzy|cooldown.call_of_the_wild.remains)
-  if S.MultiShot:IsReady() and (Pet:BuffRemains(S.BeastCleavePetBuff) < 0.25 + GCDMax and (not S.BloodyFrenzy:IsAvailable() or S.CalloftheWild:CooldownDown())) then
+  if S.MultiShot:IsReady() and (Pet:BuffRemains(S.BeastCleavePetBuff) < 0.25 + Player:GCD() and (not S.BloodyFrenzy:IsAvailable() or S.CalloftheWild:CooldownDown())) then
     if Cast(S.MultiShot, nil, nil, not Target:IsSpellInRange(S.MultiShot)) then return "multishot cleave 4"; end
   end
   -- black_arrow,if=buff.beast_cleave.remains
@@ -268,7 +267,7 @@ local function Cleave()
     if Cast(S.LightsJudgment, Settings.CommonsOGCD.OffGCDasOffGCD.Racials, nil, not Target:IsInRange(5)) then return "lights_judgment cleave 26"; end
   end
   -- cobra_shot,if=focus.time_to_max<gcd*2
-  if S.CobraShot:IsReady() and (Player:FocusTimeToMax() < GCDMax * 2) then
+  if S.CobraShot:IsReady() and (Player:FocusTimeToMax() < Player:GCD() * 2) then
     if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot cleave 28"; end
   end
   -- bag_of_tricks,if=buff.bestial_wrath.down|target.time_to_die<5
@@ -411,9 +410,6 @@ local function APL()
   TargetInRange40y = Target:IsInRange(40) -- Most abilities
   TargetInRange30y = Target:IsInRange(30) -- Stampede
   TargetInRangePet30y = (PetRangeAbility and Target:IsSpellInActionRange(PetRangeAbility)) or Target:IsInRange(30) -- Kill Command
-
-  -- Update GCDMax
-  GCDMax = Player:GCD() + 0.150
 
   -- Calculate FightRemains
   if Everyone.TargetIsValid() or Player:AffectingCombat() then
