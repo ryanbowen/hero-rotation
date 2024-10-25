@@ -536,7 +536,7 @@ local function Vanish ()
   -- actions.vanish+=/vanish,if=!buff.fatebound_lucky_coin.up&effective_combo_points>=variable.effective_spend_cp
   -- &(buff.fatebound_coin_tails.stack>=5|buff.fatebound_coin_heads.stack>=5)
   if S.Vanish:IsCastable() and Player:BuffDown(S.FateboundLuckyCoin) and ComboPoints >= EffectiveCPSpend
-    (Player:BuffStack(S.FateboundCoinTails) >= 5 or Player:BuffStack(S.FateboundCoinHeads) >= 5) then
+    and (Player:BuffStack(S.FateboundCoinTails) >= 5 or Player:BuffStack(S.FateboundCoinHeads) >= 5) then
     ShouldReturn = StealthMacro(S.Vanish)
     if ShouldReturn then
       return "Cast Vanish (Fateful Ending Fish)" .. ShouldReturn
@@ -1139,17 +1139,6 @@ local function APL ()
       ShouldReturn = Rogue.Stealth(Rogue.StealthSpell())
       if ShouldReturn then
         return ShouldReturn
-      end
-    end
-    -- Opener
-    if Everyone.TargetIsValid() then
-      -- actions.precombat+=/slice_and_dice,precombat_seconds=1
-      if not Player:BuffUp(S.SliceandDice) then
-        if S.SliceandDice:IsReady() and ComboPoints >= 2 then
-          if Cast(S.SliceandDice) then
-            return "Cast Slice and Dice"
-          end
-        end
       end
     end
   end

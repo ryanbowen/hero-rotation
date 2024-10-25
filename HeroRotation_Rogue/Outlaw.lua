@@ -386,19 +386,6 @@ local function Finish(ReturnSpellOnly)
     end
   end
 
-  -- actions.finish+=/slice_and_dice,if=buff.slice_and_dice.remains<fight_remains&refreshable
-  -- Note: Added Player:BuffRemains(S.SliceandDice) == 0 to maintain the buff while TTD is invalid (it's mainly for Solo, not an issue in raids)
-  if S.SliceandDice:IsReady() and (HL.FilteredFightRemains(EnemiesBF, ">", Player:BuffRemains(S.SliceandDice), true) or Player:BuffRemains(S.SliceandDice) == 0)
-    and Player:BuffRemains(S.SliceandDice) < (1 + ComboPoints) * 1.8 then
-    if ReturnSpellOnly then
-      return S.SliceandDice
-    else
-      if Cast(S.SliceandDice) then
-        return "Cast Slice and Dice"
-      end
-    end
-  end
-
   if S.ColdBlood:IsReady() and Player:BuffDown(S.ColdBlood) then
     if Cast(S.ColdBlood, Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood) then
       return "Cast Cold Blood"
