@@ -459,7 +459,7 @@ local function Build (EnergyThreshold, ReturnSpellOnly, ForceStealth)
     if MeleeEnemies10yCount == 2 and S.UnseenBlade:IsAvailable()
       or not Used_For_Danse(S.Shadowstrike) and S.DanseMacabre:IsAvailable() then
       for _, CycleUnit in pairs(MeleeEnemies10y) do
-        if CycleUnit:DebuffRemains(S.FindWeaknessDebuff) <= 2 then
+        if CycleUnit:GUID() ~= Target:GUID() and CycleUnit:DebuffRemains(S.FindWeaknessDebuff) <= 2 then
           CastLeftNameplate(CycleUnit, S.Shadowstrike)
         end
       end
