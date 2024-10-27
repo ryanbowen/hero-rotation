@@ -424,7 +424,7 @@ local function Stealthed (ReturnSpellOnly, ForceStealth)
         if ReturnSpellOnly then
           return S.Rupture
         else
-          if Settings.Assassination.ShowIndiscriminateCarnageOnMainIcon then
+          if IndiscriminateCarnageRemains() > 0 and Settings.Assassination.ShowIndiscriminateCarnageOnMainIcon then
             if Cast(S.Rupture, nil, nil, not TargetInMeleeRange) then
               return "Cast Rupture (Stealth Indiscriminate Carnage)"
             end
@@ -465,7 +465,7 @@ local function Stealthed (ReturnSpellOnly, ForceStealth)
         if ReturnSpellOnly then
           return S.Rupture
         else
-          if Settings.Assassination.ShowIndiscriminateCarnageOnMainIcon then
+          if IndiscriminateCarnageRemains() > 0 and Settings.Assassination.ShowIndiscriminateCarnageOnMainIcon then
             if Cast(S.Garrote, nil, nil, not TargetInMeleeRange) then
               return "Cast Garrote (Improved Garrote Carnage)"
             end
