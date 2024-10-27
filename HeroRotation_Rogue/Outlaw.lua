@@ -505,7 +505,7 @@ function StealthCDs (ReturnSpellOnly)
     if S.UnderhandedUpperhand:IsAvailable() and S.Subterfuge:IsAvailable() and S.Crackshot:IsAvailable()
       and (Player:BuffUp(S.AdrenalineRush) or S.AdrenalineRush:IsReady() and ReturnSpellOnly)
       and Finish_Condition() and (not S.BetweentheEyes:IsReady() and Player:BuffUp(S.RuthlessPrecision) or Player:BuffRemains(S.AdrenalineRush) < 3
-      or ChargedComboPoints > 0 or S.Vanish:CooldownRemains() < 15 or HL.BossFilteredFightRemains("<", 8)) then
+      or ChargedComboPoints > 0 or S.Vanish:FullRechargeTime() < 15 or HL.BossFilteredFightRemains("<", 8)) then
       ShouldReturn = SpellQueueMacro(S.Vanish, ReturnSpellOnly)
       if ShouldReturn then
         if ReturnSpellOnly then
